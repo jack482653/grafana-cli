@@ -71,12 +71,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T020 [P] [US1] Create config command in src/commands/config.ts (createConfigCommand factory, subcommands: set [--url] [--name] [--api-key] [--username] [--password], list, delete [name], show, use [name])
-- [ ] T021 [P] [US1] Create status command in src/commands/status.ts (createStatusCommand factory, options: --server [name], --json, calls getServerStatus service, formats output as table or JSON)
-- [ ] T022 [US1] Implement getServerStatus service in src/services/grafana-client.ts (fetch GET /api/health, return ServerStatus object, handle errors with meaningful messages)
-- [ ] T023 [US1] Register config and status commands in src/index.ts (import createConfigCommand and createStatusCommand, call program.addCommand for each)
-- [ ] T024 [US1] Add config file error handling in src/services/config-store.ts (handle missing directory, corrupted JSON, permission errors, provide actionable error messages to stderr)
-- [ ] T025 [US1] Add URL validation in src/services/config-store.ts (validate https?:// protocol, valid URL format using new URL() constructor, provide clear error messages)
+- [x] T020 [P] [US1] Create config command in src/commands/config.ts (createConfigCommand factory, subcommands: set [--url] [--name] [--api-key] [--username] [--password], list, delete [name], show, use [name])
+- [x] T021 [P] [US1] Create status command in src/commands/status.ts (createStatusCommand factory, options: --server [name], --json, calls getServerStatus service, formats output as table or JSON)
+- [x] T022 [US1] Implement getServerStatus service in src/services/grafana-client.ts (fetch GET /api/health, return ServerStatus object, handle errors with meaningful messages)
+- [x] T023 [US1] Register config and status commands in src/index.ts (import createConfigCommand and createStatusCommand, call program.addCommand for each)
+- [x] T024 [US1] Add config file error handling in src/services/config-store.ts (handle missing directory, corrupted JSON, permission errors, provide actionable error messages to stderr)
+- [x] T025 [US1] Add URL validation in src/services/config-store.ts (validate https?:// protocol, valid URL format using new URL() constructor, provide clear error messages)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently - users can configure servers and check status
 
