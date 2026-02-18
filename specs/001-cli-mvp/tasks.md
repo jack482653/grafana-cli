@@ -24,16 +24,16 @@
 
 **Purpose**: Initialize Node.js + TypeScript project with dependencies and tooling
 
-- [ ] T001 Initialize pnpm workspace with package.json (name: grafana-cli, version: 0.1.0, type: module, bin: grafana-cli)
-- [ ] T002 [P] Install dependencies: commander@^14.0.2, axios@^1.13.2
-- [ ] T003 [P] Install dev dependencies: typescript@^5.9.3, vitest@^4.0.16, @vitest/coverage-v8@^4.0.16, tsx@^4.21.0, prettier@^3.7.4, @trivago/prettier-plugin-sort-imports@^6.0.0, @types/node@^25.0.3
-- [ ] T004 [P] Create .nvmrc with Node.js version 18
-- [ ] T005 [P] Create tsconfig.json (target: ES2022, module: ESNext, moduleResolution: node16, strict: true, esModuleInterop: true, outDir: dist, rootDir: src)
-- [ ] T006 [P] Create .prettierrc (copy from prom-cli: semi: true, singleQuote: false, tabWidth: 2, trailingComma: all, printWidth: 100, plugins: @trivago/prettier-plugin-sort-imports, importOrder: ["^node:", "<THIRD_PARTY_MODULES>", "^[./]"])
-- [ ] T007 [P] Create vitest.config.ts (test file pattern: *.test.ts, coverage provider: v8)
-- [ ] T008 [P] Add scripts to package.json (dev: tsx src/index.ts, build: tsc, start: node dist/index.js, test: vitest, test:run: vitest run, test:coverage: vitest run --coverage, format: prettier --write ., format:check: prettier --check .)
-- [ ] T009 Create src/ directory structure (commands/, services/, formatters/, types/)
-- [ ] T010 Create tests/ directory structure (contract/, integration/, unit/)
+- [x] T001 Initialize pnpm workspace with package.json (name: grafana-cli, version: 0.1.0, type: module, bin: grafana-cli)
+- [x] T002 [P] Install dependencies: commander@^14.0.2, axios@^1.13.2
+- [x] T003 [P] Install dev dependencies: typescript@^5.9.3, vitest@^4.0.16, @vitest/coverage-v8@^4.0.16, tsx@^4.21.0, prettier@^3.7.4, @trivago/prettier-plugin-sort-imports@^6.0.0, @types/node@^25.0.3
+- [x] T004 [P] Create .nvmrc with Node.js version 18
+- [x] T005 [P] Create tsconfig.json (target: ES2022, module: ESNext, moduleResolution: node16, strict: true, esModuleInterop: true, outDir: dist, rootDir: src)
+- [x] T006 [P] Create .prettierrc (copy from prom-cli: semi: true, singleQuote: false, tabWidth: 2, trailingComma: all, printWidth: 100, plugins: @trivago/prettier-plugin-sort-imports, importOrder: ["^node:", "<THIRD_PARTY_MODULES>", "^[./]"])
+- [x] T007 [P] Create vitest.config.ts (test file pattern: *.test.ts, coverage provider: v8)
+- [x] T008 [P] Add scripts to package.json (dev: tsx src/index.ts, build: tsc, start: node dist/index.js, test: vitest, test:run: vitest run, test:coverage: vitest run --coverage, format: prettier --write ., format:check: prettier --check .)
+- [x] T009 Create src/ directory structure (commands/, services/, formatters/, types/)
+- [x] T010 Create tests/ directory structure (contract/, integration/, unit/)
 
 ---
 
@@ -43,12 +43,12 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T011 Create TypeScript types in src/types/index.ts (ServerConfig, ConfigStore, Dashboard, Panel, Query, QueryResult, Alert, ServerStatus, Datasource, TimeSeries, Datapoint, AlertState enum)
-- [ ] T012 [P] Create JSON formatter in src/formatters/json.ts (formatJson function, pretty print with 2-space indent)
-- [ ] T013 [P] Create table formatter in src/formatters/table.ts (formatTable function with columns array, calculateWidths, padEnd helpers - manual implementation like prom-cli)
-- [ ] T014 Create config store service in src/services/config-store.ts (loadConfigStore, saveConfigStore, addConfig, removeConfig, setActiveConfig, getActiveConfig functions with atomic write pattern using temp file + rename, file permissions 0600)
-- [ ] T015 Create Grafana HTTP client service in src/services/grafana-client.ts (createClient function returning axios instance with baseURL, auth headers for API key/basic auth, timeout 30s, handleError function for 401/403/network errors with exit codes 2/3)
-- [ ] T016 [P] Create CLI entry point in src/index.ts (#!/usr/bin/env node shebang, commander setup with program name/description/version, parse args)
+- [x] T011 Create TypeScript types in src/types/index.ts (ServerConfig, ConfigStore, Dashboard, Panel, Query, QueryResult, Alert, ServerStatus, Datasource, TimeSeries, Datapoint, AlertState enum)
+- [x] T012 [P] Create JSON formatter in src/formatters/json.ts (formatJson function, pretty print with 2-space indent)
+- [x] T013 [P] Create table formatter in src/formatters/table.ts (formatTable function with columns array, calculateWidths, padEnd helpers - manual implementation like prom-cli)
+- [x] T014 Create config store service in src/services/config-store.ts (loadConfigStore, saveConfigStore, addConfig, removeConfig, setActiveConfig, getActiveConfig functions with atomic write pattern using temp file + rename, file permissions 0600)
+- [x] T015 Create Grafana HTTP client service in src/services/grafana-client.ts (createClient function returning axios instance with baseURL, auth headers for API key/basic auth, timeout 30s, handleError function for 401/403/network errors with exit codes 2/3)
+- [x] T016 [P] Create CLI entry point in src/index.ts (#!/usr/bin/env node shebang, commander setup with program name/description/version, parse args)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
