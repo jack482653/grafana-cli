@@ -4,23 +4,29 @@ import path from "node:path";
 
 import type { ConfigStore, ServerConfig } from "../types/index.js";
 
-const CONFIG_DIR = path.join(os.homedir(), ".grafana-cli");
-const CONFIG_FILE = path.join(CONFIG_DIR, "config.json");
+function getConfigPath(): string {
+  return process.env["GRAFANA_CLI_CONFIG_PATH"] || path.join(os.homedir(), ".grafana-cli", "config.json");
+}
+
+function getConfigDir(): string {
+  return path.dirname(getConfigPath());
+}
 
 /**
  * Load config store from disk
  */
 export function loadConfigStore(): ConfigStore {
+  const configFile = getConfigPath();
   try {
-    if (!fs.existsSync(CONFIG_FILE)) {
+    if (!fs.existsSync(configFile)) {
       return { configs: {}, activeConfig: undefined };
     }
 
-    const data = fs.readFileSync(CONFIG_FILE, "utf-8");
+    const data = fs.readFileSync(configFile, "utf-8");
     return JSON.parse(data) as ConfigStore;
   } catch (error) {
     if (error instanceof SyntaxError) {
-      console.error(`Error: Config file is corrupted: ${CONFIG_FILE}`);
+      console.error(`Error: Config file is corrupted: ${configFile}`);
       console.error("Please fix or delete the file and try again.");
       process.exit(1);
     }
@@ -32,24 +38,26 @@ export function loadConfigStore(): ConfigStore {
  * Save config store to disk with atomic write pattern
  */
 export function saveConfigStore(store: ConfigStore): void {
+  const configFile = getConfigPath();
+  const configDir = getConfigDir();
   try {
     // Ensure directory exists
-    if (!fs.existsSync(CONFIG_DIR)) {
-      fs.mkdirSync(CONFIG_DIR, { recursive: true });
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
     }
 
     // Atomic write: temp file + rename
-    const tempFile = `${CONFIG_FILE}.tmp`;
+    const tempFile = `${configFile}.tmp`;
     fs.writeFileSync(tempFile, JSON.stringify(store, null, 2), "utf-8");
 
     // Set file permissions to 0600 (owner read/write only)
     fs.chmodSync(tempFile, 0o600);
 
     // Rename temp file to actual config file (atomic on POSIX systems)
-    fs.renameSync(tempFile, CONFIG_FILE);
+    fs.renameSync(tempFile, configFile);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "EACCES") {
-      console.error(`Error: Permission denied writing to: ${CONFIG_FILE}`);
+      console.error(`Error: Permission denied writing to: ${configFile}`);
       console.error("Check file and directory permissions.");
       process.exit(1);
     }

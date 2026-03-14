@@ -62,12 +62,12 @@
 
 ### Contract Tests for User Story 1 (Required by Constitution)
 
-- [ ] T017 [P] [US1] Contract test for GET /api/health in tests/contract/health.test.ts (test returns 200 with version, database "ok", commit fields)
-- [ ] T018 [P] [US1] Contract test for authentication failure in tests/contract/health.test.ts (test returns 401 with invalid API key, 403 with insufficient permissions)
+- [x] T017 [P] [US1] Contract test for GET /api/health in tests/contract/health.test.ts (test returns 200 with version, database "ok", commit fields)
+- [x] T018 [P] [US1] Contract test for authentication failure in tests/contract/health.test.ts (test returns 401 with invalid API key, 403 with insufficient permissions)
 
 ### Integration Tests for User Story 1 (Required by Constitution)
 
-- [ ] T019 [P] [US1] Integration test for config flow in tests/integration/config-flow.test.ts (test config set → config list → status command → verify output contains version and database status)
+- [x] T019 [P] [US1] Integration test for config flow in tests/integration/config-flow.test.ts (test config set → config list → status command → verify output contains version and database status)
 
 ### Implementation for User Story 1
 
