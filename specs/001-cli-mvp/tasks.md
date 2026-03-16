@@ -28,7 +28,7 @@
 - [x] T002 [P] Install dependencies: commander@^14.0.2, axios@^1.13.2
 - [x] T003 [P] Install dev dependencies: typescript@^5.9.3, vitest@^4.0.16, @vitest/coverage-v8@^4.0.16, tsx@^4.21.0, prettier@^3.7.4, @trivago/prettier-plugin-sort-imports@^6.0.0, @types/node@^25.0.3
 - [x] T004 [P] Create .nvmrc with Node.js version 18
-- [x] T005 [P] Create tsconfig.json (target: ES2022, module: ESNext, moduleResolution: node16, strict: true, esModuleInterop: true, outDir: dist, rootDir: src)
+- [x] T005 [P] Create tsconfig.json (target: ES2022, module: Node16, moduleResolution: node16, strict: true, esModuleInterop: true, outDir: dist, rootDir: src)
 - [x] T006 [P] Create .prettierrc (copy from prom-cli: semi: true, singleQuote: false, tabWidth: 2, trailingComma: all, printWidth: 100, plugins: @trivago/prettier-plugin-sort-imports, importOrder: ["^node:", "<THIRD_PARTY_MODULES>", "^[./]"])
 - [x] T007 [P] Create vitest.config.ts (test file pattern: *.test.ts, coverage provider: v8)
 - [x] T008 [P] Add scripts to package.json (dev: tsx src/index.ts, build: tsc, start: node dist/index.js, test: vitest, test:run: vitest run, test:coverage: vitest run --coverage, format: prettier --write ., format:check: prettier --check .)
@@ -90,23 +90,23 @@
 
 ### Contract Tests for User Story 2 (Required by Constitution)
 
-- [ ] T026 [P] [US2] Contract test for GET /api/search in tests/contract/dashboards.test.ts (test returns 200 with array of dashboards, verify fields: uid, title, tags, folderTitle)
-- [ ] T027 [P] [US2] Contract test for GET /api/search with filters in tests/contract/dashboards.test.ts (test query param, tag param, folderIds param return filtered results)
-- [ ] T028 [P] [US2] Contract test for GET /api/dashboards/uid/:uid in tests/contract/dashboards.test.ts (test returns 200 with dashboard object containing panels array, verify panel structure: id, title, type, datasource, targets)
-- [ ] T029 [P] [US2] Contract test for dashboard not found in tests/contract/dashboards.test.ts (test GET /api/dashboards/uid/invalid returns 404)
+- [x] T026 [P] [US2] Contract test for GET /api/search in tests/contract/dashboards.test.ts (test returns 200 with array of dashboards, verify fields: uid, title, tags, folderTitle)
+- [x] T027 [P] [US2] Contract test for GET /api/search with filters in tests/contract/dashboards.test.ts (test query param, tag param, folderIds param return filtered results)
+- [x] T028 [P] [US2] Contract test for GET /api/dashboards/uid/:uid in tests/contract/dashboards.test.ts (test returns 200 with dashboard object containing panels array, verify panel structure: id, title, type, datasource, targets)
+- [x] T029 [P] [US2] Contract test for dashboard not found in tests/contract/dashboards.test.ts (test GET /api/dashboards/uid/invalid returns 404)
 
 ### Integration Tests for User Story 2 (Required by Constitution)
 
-- [ ] T030 [P] [US2] Integration test for dashboard flow in tests/integration/dashboard-flow.test.ts (test dashboard list → dashboard get [uid] → verify output contains panels with IDs and queries)
+- [x] T030 [P] [US2] Integration test for dashboard flow in tests/integration/dashboard-flow.test.ts (test dashboard list → dashboard get [uid] → verify output contains panels with IDs and queries)
 
 ### Implementation for User Story 2
 
-- [ ] T031 [P] [US2] Create dashboard command in src/commands/dashboard.ts (createDashboardCommand factory, subcommands: list [--folder] [--tag] [--query] [--server] [--json], get [uid] [--server] [--json])
-- [ ] T032 [US2] Implement listDashboards service in src/services/grafana-client.ts (fetch GET /api/search?type=dash-db with query params, return Dashboard[], handle filters: folderIds, tag, query)
-- [ ] T033 [US2] Implement getDashboard service in src/services/grafana-client.ts (fetch GET /api/dashboards/uid/:uid, return Dashboard object with panels, handle 404 not found)
-- [ ] T034 [US2] Register dashboard command in src/index.ts (import createDashboardCommand, call program.addCommand)
-- [ ] T035 [US2] Add dashboard list table formatting in src/commands/dashboard.ts (format dashboard list output with columns: UID, TITLE, FOLDER, TAGS - use formatTable from formatters)
-- [ ] T036 [US2] Add dashboard get output formatting in src/commands/dashboard.ts (format dashboard details with panels list showing panel ID, title, type, datasource, query preview)
+- [x] T031 [P] [US2] Create dashboard command in src/commands/dashboard.ts (createDashboardCommand factory, subcommands: list [--folder] [--tag] [--query] [--server] [--json], get [uid] [--server] [--json])
+- [x] T032 [US2] Implement listDashboards service in src/services/grafana-client.ts (fetch GET /api/search?type=dash-db with query params, return Dashboard[], handle filters: folderIds, tag, query)
+- [x] T033 [US2] Implement getDashboard service in src/services/grafana-client.ts (fetch GET /api/dashboards/uid/:uid, return Dashboard object with panels, handle 404 not found)
+- [x] T034 [US2] Register dashboard command in src/index.ts (import createDashboardCommand, call program.addCommand)
+- [x] T035 [US2] Add dashboard list table formatting in src/commands/dashboard.ts (format dashboard list output with columns: UID, TITLE, FOLDER, TAGS - use formatTable from formatters)
+- [x] T036 [US2] Add dashboard get output formatting in src/commands/dashboard.ts (format dashboard details with panels list showing panel ID, title, type, datasource, query preview)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently - users can configure servers, check status, and explore dashboards
 

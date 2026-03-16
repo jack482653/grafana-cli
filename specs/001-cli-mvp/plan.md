@@ -15,14 +15,14 @@ Build a command-line interface for Grafana v7.5 that enables DevOps and SRE team
 - `axios` (HTTP client for Grafana REST API)
 - `pnpm` (package manager and Node version management)
 - `prettier` + `@trivago/prettier-plugin-sort-imports` (code formatting)
-- Test framework: NEEDS CLARIFICATION (jest, vitest, or node:test)
+- Test framework: `vitest` 4.x (see research.md Decision 1)
 
 **Storage**: File system (`~/.grafana-cli/config.json` for server configurations)
 **Testing**:
 - Contract tests for Grafana API endpoints (required)
 - Integration tests for user journeys (required)
 - Unit tests for complex logic (optional for MVP)
-- Test framework: NEEDS CLARIFICATION
+- Test framework: `vitest` 4.x — chosen for native ESM support and fast execution (see research.md Decision 1)
 
 **Target Platform**: macOS and Linux (primary), Windows via Git Bash or WSL (secondary)
 **Project Type**: Single CLI application (not web/mobile)

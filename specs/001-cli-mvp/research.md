@@ -175,6 +175,19 @@ This document captures all technical decisions made during Phase 0 research to r
 - **Services layer**: Contains business logic (config management, API client) separate from CLI commands
 - **Testability**: Services can be tested independently of CLI framework
 
+**Governance exception — Principle I vs Principle III (DIP)**:
+
+Constitution Principle III mandates Dependency Inversion (interfaces like `IConfigStore`, `IGrafanaClient`) and Principle III is marked NON-NEGOTIABLE. However, introducing these interfaces for MVP with a single implementation each would add abstraction purely for hypothetical future use — violating Principle I (YAGNI).
+
+**Resolution**: Principle I takes precedence during MVP phase. DIP abstraction is deferred.
+
+**Migration trigger**: Introduce `IGrafanaClient` / `IConfigStore` interfaces when ANY of the following occurs:
+1. A second implementation of either interface is needed (e.g., mock client for unit tests, or multiple config backends)
+2. Unit tests require mocking `grafana-client.ts` or `config-store.ts` in isolation
+3. US3 (Query Execution) is implemented and complexity of `grafana-client.ts` exceeds ~200 lines
+
+This exception is scoped to MVP (US1-US2). Re-evaluate before shipping US3.
+
 **Structure comparison**:
 
 | Full Clean Architecture (Planned) | Simplified (Chosen for MVP) |
@@ -227,7 +240,7 @@ If complexity grows (e.g., multiple datasource types, complex query transformati
 **Rationale**:
 - **Type safety**: Strict mode catches errors early, aligns with constitution code quality principle
 - **Modern syntax**: ES2022 target enables top-level await, ?? nullish coalescing, optional chaining
-- **ESM native**: `"module": "ESNext"` and `"moduleResolution": "node16"` for native ESM support
+- **ESM native**: `"module": "Node16"` and `"moduleResolution": "node16"` for native ESM support — TypeScript requires these to match; `ESNext` with `node16` resolution raises a compilation error
 - **Node.js built-ins**: `@types/node` for fs, path, os module types
 - **Reference project**: prom-cli uses similar config (TypeScript 5.9.3, strict mode)
 
@@ -236,7 +249,7 @@ If complexity grows (e.g., multiple datasource types, complex query transformati
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ESNext",
+    "module": "Node16",
     "moduleResolution": "node16",
     "lib": ["ES2022"],
     "outDir": "./dist",
