@@ -1,6 +1,6 @@
 import axios, { type AxiosError, type AxiosInstance } from "axios";
 
-import type { ServerConfig, ServerStatus } from "../types/index.js";
+import type { Dashboard, ServerConfig, ServerStatus } from "../types/index.js";
 
 /**
  * Create axios HTTP client for Grafana API
@@ -88,6 +88,85 @@ export async function getServerStatus(config: ServerConfig): Promise<ServerStatu
     const response = await client.get<ServerStatus>("/api/health");
     return response.data;
   } catch (error) {
+    handleError(error, config.url);
+  }
+}
+
+/**
+ * List dashboards from Grafana search API
+ */
+export async function listDashboards(
+  config: ServerConfig,
+  filters: { folder?: string; tag?: string; query?: string } = {},
+): Promise<Dashboard[]> {
+  const client = createClient(config);
+
+  const params: Record<string, string> = { type: "dash-db" };
+  if (filters.query) params["query"] = filters.query;
+  if (filters.tag) params["tag"] = filters.tag;
+
+  try {
+    const response = await client.get<any[]>("/api/search", { params });
+    let results = response.data;
+
+    // Filter by folder name client-side (API only supports folderIds)
+    if (filters.folder) {
+      const folderLower = filters.folder.toLowerCase();
+      results = results.filter(
+        (d) => d.folderTitle?.toLowerCase().includes(folderLower),
+      );
+    }
+
+    return results.map((d) => ({
+      uid: d.uid,
+      title: d.title,
+      tags: d.tags || [],
+      folderTitle: d.folderTitle,
+      url: d.url,
+    }));
+  } catch (error) {
+    handleError(error, config.url);
+  }
+}
+
+/**
+ * Get a full dashboard definition by UID
+ */
+export async function getDashboard(config: ServerConfig, uid: string): Promise<Dashboard> {
+  const client = createClient(config);
+
+  try {
+    const response = await client.get<{ dashboard: any; meta: any }>(
+      `/api/dashboards/uid/${uid}`,
+    );
+    const { dashboard, meta } = response.data;
+
+    return {
+      uid: dashboard.uid,
+      title: dashboard.title,
+      tags: dashboard.tags || [],
+      folderTitle: meta.folderTitle,
+      url: meta.url,
+      panels: (dashboard.panels || []).map((p: any) => ({
+        id: p.id,
+        title: p.title,
+        type: p.type,
+        datasource: p.datasource,
+        targets: (p.targets || []).map((t: any) => ({
+          refId: t.refId,
+          datasource: t.datasource,
+          expr: t.expr,
+          query: t.query,
+          queryType: t.queryType,
+        })),
+      })),
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      console.error(`Error: Dashboard not found: ${uid}`);
+      console.error("List available dashboards with: grafana-cli dashboard list");
+      process.exit(1);
+    }
     handleError(error, config.url);
   }
 }
