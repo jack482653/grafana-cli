@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(git fetch:*)",
-      "Bash(ls:*)",
-      "Bash(/Users/zhangwuxian/Code/grafana-cli/*)"
-    ]
-  }
-}

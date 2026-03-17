@@ -28,7 +28,7 @@ export function createConfigCommand(): Command {
       try {
         const url = new URL(options.url);
         if (!url.protocol.match(/^https?:$/)) {
-          console.error("Error: URL must use http:// or https:// protocol");
+          console.error("Error: Only http:// or https:// protocols are supported for the URL.");
           process.exit(1);
         }
       } catch {
