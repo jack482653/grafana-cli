@@ -1,6 +1,6 @@
 import axios, { type AxiosError, type AxiosInstance } from "axios";
 
-import type { Dashboard, ServerConfig, ServerStatus } from "../types/index.js";
+import type { Dashboard, QueryResult, ServerConfig, ServerStatus, TimeSeries } from "../types/index.js";
 
 /**
  * Create axios HTTP client for Grafana API
@@ -169,4 +169,104 @@ export async function getDashboard(config: ServerConfig, uid: string): Promise<D
     }
     handleError(error, config.url);
   }
+}
+
+/**
+ * Execute panel queries via Grafana datasource proxy (POST /api/ds/query)
+ */
+export async function executeQuery(
+  config: ServerConfig,
+  dashboardUid: string,
+  panelId: number,
+  timeRange: { from: number; to: number },
+  variables: Record<string, string> = {},
+  signal?: AbortSignal,
+): Promise<QueryResult[]> {
+  const dashboard = await getDashboard(config, dashboardUid);
+  const panel = (dashboard.panels || []).find((p) => p.id === panelId);
+
+  if (!panel) {
+    console.error(`Error: Panel ${panelId} not found in dashboard "${dashboard.title}"`);
+    console.error("List panels with: grafana-cli dashboard get " + dashboardUid);
+    process.exit(1);
+  }
+
+  if (!panel.targets || panel.targets.length === 0) {
+    console.error(`Error: Panel ${panelId} has no queries.`);
+    process.exit(1);
+  }
+
+  // Apply variable substitution and build query objects
+  const queries = panel.targets.map((target) => {
+    const datasource = target.datasource ?? panel.datasource;
+    const applyVars = (s?: string) =>
+      s?.replace(/\$(\w+)/g, (_, name: string) => variables[name] ?? `$${name}`);
+
+    return {
+      refId: target.refId,
+      datasource,
+      expr: applyVars(target.expr),
+      query: applyVars(target.query),
+      queryType: target.queryType,
+      instant: false,
+      range: true,
+      intervalMs: 30000,
+      maxDataPoints: 1000,
+    };
+  });
+
+  const client = createClient(config);
+
+  let rawResults: Record<string, any>;
+  try {
+    const response = await client.post<{ results: Record<string, any> }>(
+      "/api/ds/query",
+      {
+        queries,
+        from: String(timeRange.from),
+        to: String(timeRange.to),
+      },
+      { signal },
+    );
+    rawResults = response.data.results;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 400) {
+      console.error("Error: Query syntax error.");
+      if (error.response.data?.message) {
+        console.error(`Message: ${error.response.data.message}`);
+      }
+      process.exit(1);
+    }
+    handleError(error, config.url);
+  }
+
+  // Parse frames into QueryResult[]
+  return Object.entries(rawResults).map(([refId, result]) => {
+    if (result.error) {
+      console.error(`Warning: Query ${refId} failed: ${result.error}`);
+      return { refId, series: [] };
+    }
+
+    const series: TimeSeries[] = [];
+    for (const frame of result.frames || []) {
+      const fields: any[] = frame.schema?.fields || [];
+      const values: any[][] = frame.data?.values || [];
+      const timestamps: number[] = values[0] || [];
+
+      // Each field after the first Time field is a value series
+      for (let i = 1; i < fields.length; i++) {
+        const field = fields[i];
+        series.push({
+          name: field.name || frame.schema?.name || refId,
+          labels: field.labels || {},
+          datapoints: timestamps.map((ts, idx) => ({
+            timestamp: ts,
+            value: values[i]?.[idx] ?? null,
+          })),
+        });
+      }
+    }
+
+    return { refId, series };
+  });
 }
