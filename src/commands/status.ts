@@ -2,7 +2,7 @@ import { Command } from "commander";
 
 import { formatJson } from "../formatters/json.js";
 import { formatTable } from "../formatters/table.js";
-import { getActiveConfig, loadConfigStore } from "../services/config-store.js";
+import { resolveConfig } from "../services/config-store.js";
 import { getServerStatus } from "../services/grafana-client.js";
 
 export function createStatusCommand(): Command {
@@ -12,26 +12,7 @@ export function createStatusCommand(): Command {
   cmd.option("--json", "Output as JSON");
 
   cmd.action(async (options) => {
-    // Get config
-    let config;
-    if (options.server) {
-      const store = loadConfigStore();
-      config = store.configs[options.server];
-      if (!config) {
-        console.error(`Error: Configuration "${options.server}" not found`);
-        console.error("List available configurations with: grafana-cli config list");
-        process.exit(1);
-      }
-    } else {
-      config = getActiveConfig();
-      if (!config) {
-        console.error("Error: No active configuration");
-        console.error("Set a configuration with: grafana-cli config set --url <url> --name <name>");
-        process.exit(1);
-      }
-    }
-
-    // Fetch server status
+    const config = resolveConfig(options.server);
     const status = await getServerStatus(config);
 
     if (options.json) {

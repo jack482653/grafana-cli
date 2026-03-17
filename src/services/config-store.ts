@@ -140,3 +140,28 @@ export function getActiveConfig(): ServerConfig | null {
 
   return store.configs[store.activeConfig] || null;
 }
+
+/**
+ * Resolve server config from --server option or fall back to active config.
+ * Prints error and exits if config cannot be resolved.
+ */
+export function resolveConfig(serverName?: string): ServerConfig {
+  if (serverName) {
+    const store = loadConfigStore();
+    const config = store.configs[serverName];
+    if (!config) {
+      console.error(`Error: Configuration "${serverName}" not found.`);
+      console.error("List available configurations with: grafana-cli config list");
+      process.exit(1);
+    }
+    return config;
+  }
+
+  const config = getActiveConfig();
+  if (!config) {
+    console.error("Error: No active server configuration.");
+    console.error("Add a server with: grafana-cli config set --name <name> --url <url>");
+    process.exit(1);
+  }
+  return config;
+}

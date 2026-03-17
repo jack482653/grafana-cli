@@ -2,7 +2,7 @@ import { Command } from "commander";
 
 import { formatJson } from "../formatters/json.js";
 import { formatTable } from "../formatters/table.js";
-import { getActiveConfig, loadConfigStore } from "../services/config-store.js";
+import { resolveConfig } from "../services/config-store.js";
 import { getDashboard, listDashboards } from "../services/grafana-client.js";
 
 export function createDashboardCommand(): Command {
@@ -17,23 +17,7 @@ export function createDashboardCommand(): Command {
     .option("--query <text>", "Search by title")
     .option("--json", "Output as JSON")
     .action(async (options) => {
-      let config;
-      if (options.server) {
-        const store = loadConfigStore();
-        config = store.configs[options.server];
-        if (!config) {
-          console.error(`Error: Configuration "${options.server}" not found.`);
-          console.error("List available configurations with: grafana-cli config list");
-          process.exit(1);
-        }
-      } else {
-        config = getActiveConfig();
-        if (!config) {
-          console.error("Error: No active server configuration.");
-          console.error("Add a server with: grafana-cli config set --name <name> --url <url>");
-          process.exit(1);
-        }
-      }
+      const config = resolveConfig(options.server);
 
       const dashboards = await listDashboards(config, {
         folder: options.folder,
@@ -75,23 +59,7 @@ export function createDashboardCommand(): Command {
     .option("--server <name>", "Use specific server configuration")
     .option("--json", "Output as JSON")
     .action(async (uid: string, options) => {
-      let config;
-      if (options.server) {
-        const store = loadConfigStore();
-        config = store.configs[options.server];
-        if (!config) {
-          console.error(`Error: Configuration "${options.server}" not found.`);
-          console.error("List available configurations with: grafana-cli config list");
-          process.exit(1);
-        }
-      } else {
-        config = getActiveConfig();
-        if (!config) {
-          console.error("Error: No active server configuration.");
-          console.error("Add a server with: grafana-cli config set --name <name> --url <url>");
-          process.exit(1);
-        }
-      }
+      const config = resolveConfig(options.server);
 
       const d = await getDashboard(config, uid);
 
