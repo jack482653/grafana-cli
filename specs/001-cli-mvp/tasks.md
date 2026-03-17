@@ -120,24 +120,24 @@
 
 ### Contract Tests for User Story 3 (Required by Constitution)
 
-- [ ] T037 [P] [US3] Contract test for POST /api/ds/query in tests/contract/queries.test.ts (test single query returns 200 with results object, verify frame structure: schema.fields, data.values arrays)
-- [ ] T038 [P] [US3] Contract test for POST /api/ds/query with multiple queries in tests/contract/queries.test.ts (test multiple queries return results keyed by refId: A, B, C)
-- [ ] T039 [P] [US3] Contract test for invalid query syntax in tests/contract/queries.test.ts (test returns 400 or partial error with message)
-- [ ] T040 [P] [US3] Contract test for query timeout in tests/contract/queries.test.ts (test long-running query returns 504 or timeout error)
+- [x] T037 [P] [US3] Contract test for POST /api/ds/query in tests/contract/queries.test.ts (test single query returns 200 with results object, verify frame structure: schema.fields, data.values arrays)
+- [x] T038 [P] [US3] Contract test for POST /api/ds/query with multiple queries in tests/contract/queries.test.ts (test multiple queries return results keyed by refId: A, B, C)
+- [x] T039 [P] [US3] Contract test for invalid query syntax in tests/contract/queries.test.ts (test returns 400 or partial error with message)
+- [x] T040 [P] [US3] Contract test for query timeout in tests/contract/queries.test.ts (test long-running query returns 504 or timeout error)
 
 ### Integration Tests for User Story 3 (Required by Constitution)
 
-- [ ] T041 [P] [US3] Integration test for query flow in tests/integration/query-flow.test.ts (test dashboard get → query execute --dashboard [uid] --panel [id] --from "now-1h" --to "now" → verify output contains timestamps and values)
+- [x] T041 [P] [US3] Integration test for query flow in tests/integration/query-flow.test.ts (test dashboard get → query execute --dashboard [uid] --panel [id] --from "now-1h" --to "now" → verify output contains timestamps and values)
 
 ### Implementation for User Story 3
 
-- [ ] T042 [P] [US3] Create query command in src/commands/query.ts (createQueryCommand factory, subcommand: execute --dashboard [uid] --panel [id] --from [time] --to [time] [--var key=value] [--server] [--json])
-- [ ] T043 [P] [US3] Create time parser service in src/services/time-parser.ts (parseTimeRange function to convert "now-1h", "now-24h", ISO 8601 strings, Unix timestamps to milliseconds)
-- [ ] T044 [US3] Implement executeQuery service in src/services/grafana-client.ts (fetch dashboard by UID, extract panel by ID, build query request with datasource and targets, POST /api/ds/query, return QueryResult[], handle multiple queries per panel)
-- [ ] T045 [US3] Register query command in src/index.ts (import createQueryCommand, call program.addCommand)
-- [ ] T046 [US3] Add query result table formatting in src/commands/query.ts (format query results with columns: TIMESTAMP, VALUE, LABELS - one table per query refId, handle multiple time series per query)
-- [ ] T047 [US3] Add template variable support in src/commands/query.ts (parse --var flags, substitute variables in query expressions before execution - note: basic string replacement for MVP, full dashboard variable context deferred)
-- [ ] T048 [US3] Add progress indicator for long-running queries in src/commands/query.ts (write "Executing query..." to stderr, handle Ctrl+C cancellation with axios cancel token)
+- [x] T042 [P] [US3] Create query command in src/commands/query.ts (createQueryCommand factory, subcommand: execute --dashboard [uid] --panel [id] --from [time] --to [time] [--var key=value] [--server] [--json])
+- [x] T043 [P] [US3] Create time parser service in src/services/time-parser.ts (parseTimeRange function to convert "now-1h", "now-24h", ISO 8601 strings, Unix timestamps to milliseconds)
+- [x] T044 [US3] Implement executeQuery service in src/services/grafana-client.ts (fetch dashboard by UID, extract panel by ID, build query request with datasource and targets, POST /api/ds/query, return QueryResult[], handle multiple queries per panel)
+- [x] T045 [US3] Register query command in src/index.ts (import createQueryCommand, call program.addCommand)
+- [x] T046 [US3] Add query result table formatting in src/commands/query.ts (format query results with columns: TIMESTAMP, VALUE, LABELS - one table per query refId, handle multiple time series per query)
+- [x] T047 [US3] Add template variable support in src/commands/query.ts (parse --var flags, substitute variables in query expressions before execution - note: basic string replacement for MVP, full dashboard variable context deferred)
+- [x] T048 [US3] Add progress indicator for long-running queries in src/commands/query.ts (write "Executing query..." to stderr, handle Ctrl+C cancellation with axios cancel token)
 
 **Checkpoint**: At this point, User Stories 1, 2, AND 3 should all work independently - users can configure, explore, and query dashboards
 
