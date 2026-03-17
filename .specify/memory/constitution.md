@@ -101,9 +101,9 @@ Sync Impact Report:
 ### Quality Gates
 
 **Pre-commit**:
-- Code MUST pass linting (ESLint) and formatting (Prettier)
-- Type checking MUST pass (TypeScript strict mode)
-- No console.log in committed code (use proper logging or remove)
+- Code MUST pass formatting (Prettier) and type checking (TypeScript strict mode)
+- Linting: ESLint is deferred until MVP ships; TypeScript strict mode serves as the primary static analysis gate for MVP
+- No debug `console.log` in committed code (remove or replace with intentional output). Note: CLI commands legitimately use `console.log` for stdout output and `console.error` for stderr — these are NOT debug logs and are permitted per Principle II (CLI-First Interface)
 
 **Pre-PR**:
 - All contract tests MUST pass

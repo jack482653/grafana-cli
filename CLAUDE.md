@@ -114,3 +114,10 @@ mcp__github__pull_request_read(
 - `ID`: Thread ID (用於 resolve)
 - `Comments.Nodes[].ID`: Comment ID (用於 in_reply_to)
 - `IsResolved`: 是否已解決
+
+## Active Technologies
+- Node.js 18+ (LTS), TypeScript 5.x (target: ES2022) (001-cli-mvp)
+- File system (`~/.grafana-cli/config.json` for server configurations) (001-cli-mvp)
+
+## Recent Changes
+- 001-cli-mvp: Added Node.js 18+ (LTS), TypeScript 5.x (target: ES2022)
