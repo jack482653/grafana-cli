@@ -172,46 +172,27 @@ export async function getDashboard(config: ServerConfig, uid: string): Promise<D
 }
 
 /**
- * Resolve a datasource reference to an object with { type, uid }.
- *
- * Grafana v7.5 panels store datasource as a plain string name (e.g. "Prometheus")
- * or null (= default), but POST /api/ds/query requires { type, uid }.
+ * Resolve a datasource string name to its numeric id via /api/datasources/name/:name.
+ * Returns undefined if the API call fails (e.g. insufficient permissions).
  */
-async function resolveDatasource(
+async function resolveDatasourceId(
   client: AxiosInstance,
-  datasource: string | { type?: string; uid?: string } | null | undefined,
-): Promise<{ type?: string; uid: string } | undefined> {
-  // Already has uid — use as-is
-  if (datasource && typeof datasource === "object" && datasource.uid) {
-    return datasource as { type?: string; uid: string };
-  }
-
-  // String name — look up by name
-  if (typeof datasource === "string" && datasource) {
-    try {
-      const resp = await client.get<any>(
-        `/api/datasources/name/${encodeURIComponent(datasource)}`,
-      );
-      return { type: resp.data.type, uid: resp.data.uid };
-    } catch {
-      return undefined;
-    }
-  }
-
-  // null / undefined — find default datasource
+  name: string,
+): Promise<number | undefined> {
   try {
-    const resp = await client.get<any[]>("/api/datasources");
-    const ds = resp.data.find((d: any) => d.isDefault) ?? resp.data[0];
-    if (ds) return { type: ds.type, uid: ds.uid };
+    const resp = await client.get<any>(`/api/datasources/name/${encodeURIComponent(name)}`);
+    return resp.data.id as number;
   } catch {
-    // ignore
+    return undefined;
   }
-
-  return undefined;
 }
 
 /**
- * Execute panel queries via Grafana datasource proxy (POST /api/ds/query)
+ * Execute panel queries via Grafana v7.5 legacy endpoint (POST /api/tsdb/query).
+ *
+ * The newer /api/ds/query endpoint requires datasource UIDs which were introduced
+ * in Grafana 8.x. For v7.5 compatibility we use /api/tsdb/query with datasourceId
+ * (numeric). Response format: results[refId].series[].{ name, points: [value, ts][] }
  */
 export async function executeQuery(
   config: ServerConfig,
@@ -220,6 +201,7 @@ export async function executeQuery(
   timeRange: { from: number; to: number },
   variables: Record<string, string> = {},
   signal?: AbortSignal,
+  datasourceOverride?: string,
 ): Promise<QueryResult[]> {
   const dashboard = await getDashboard(config, dashboardUid);
   const panel = (dashboard.panels || []).find((p) => p.id === panelId);
@@ -237,34 +219,52 @@ export async function executeQuery(
 
   const client = createClient(config);
 
-  // Resolve panel-level datasource once (fallback for targets without their own)
-  const panelDs = await resolveDatasource(client, panel.datasource);
+  // Resolve datasource to numeric id
+  let datasourceId: number | undefined;
+
+  if (datasourceOverride) {
+    if (/^\d+$/.test(datasourceOverride)) {
+      datasourceId = parseInt(datasourceOverride, 10);
+    } else {
+      datasourceId = await resolveDatasourceId(client, datasourceOverride);
+      if (!datasourceId) {
+        console.error(`Error: Cannot resolve datasource "${datasourceOverride}".`);
+        console.error("Your API key may not have permission to look up datasources.");
+        console.error("Use the numeric datasource ID instead: --datasource <id>");
+        process.exit(1);
+      }
+    }
+  } else if (typeof panel.datasource === "string" && panel.datasource) {
+    datasourceId = await resolveDatasourceId(client, panel.datasource);
+  } else if (panel.datasource && typeof panel.datasource === "object" && (panel.datasource as any).id) {
+    datasourceId = (panel.datasource as any).id;
+  }
+
+  if (!datasourceId) {
+    console.error("Error: Cannot determine datasource ID for this panel.");
+    console.error("The panel uses the default datasource, but it cannot be resolved automatically.");
+    console.error("Specify it manually: --datasource <numeric-id>");
+    console.error("Find the ID in Grafana → Configuration → Data Sources → select datasource → check the URL (id=N).");
+    process.exit(1);
+  }
 
   const applyVars = (s?: string) =>
     s?.replace(/\$(\w+)/g, (_, name: string) => variables[name] ?? `$${name}`);
 
-  // Resolve each target's datasource, falling back to panel's
-  const queries = await Promise.all(
-    panel.targets.map(async (target) => {
-      const ds = (await resolveDatasource(client, target.datasource)) ?? panelDs;
-      return {
-        refId: target.refId,
-        datasource: ds,
-        expr: applyVars(target.expr),
-        query: applyVars(target.query),
-        queryType: target.queryType,
-        instant: false,
-        range: true,
-        intervalMs: 30000,
-        maxDataPoints: 1000,
-      };
-    }),
-  );
+  const queries = panel.targets.map((target) => ({
+    refId: target.refId,
+    datasourceId,
+    expr: applyVars(target.expr),
+    query: applyVars(target.query),
+    queryType: target.queryType,
+    intervalMs: 30000,
+    maxDataPoints: 1000,
+  }));
 
   let rawResults: Record<string, any>;
   try {
     const response = await client.post<{ results: Record<string, any> }>(
-      "/api/ds/query",
+      "/api/tsdb/query",
       {
         queries,
         from: String(timeRange.from),
@@ -284,32 +284,34 @@ export async function executeQuery(
     handleError(error, config.url);
   }
 
-  // Parse frames into QueryResult[]
+  // Parse /api/tsdb/query response: results[refId].series[].{ name, points: [value, ts][] }
   return Object.entries(rawResults).map(([refId, result]) => {
     if (result.error) {
       console.error(`Warning: Query ${refId} failed: ${result.error}`);
       return { refId, series: [] };
     }
 
-    const series: TimeSeries[] = [];
-    for (const frame of result.frames || []) {
-      const fields: any[] = frame.schema?.fields || [];
-      const values: any[][] = frame.data?.values || [];
-      const timestamps: number[] = values[0] || [];
-
-      // Each field after the first Time field is a value series
-      for (let i = 1; i < fields.length; i++) {
-        const field = fields[i];
-        series.push({
-          name: field.name || frame.schema?.name || refId,
-          labels: field.labels || {},
-          datapoints: timestamps.map((ts, idx) => ({
-            timestamp: ts,
-            value: values[i]?.[idx] ?? null,
-          })),
-        });
+    const series: TimeSeries[] = (result.series || []).map((s: any) => {
+      // Parse labels from series name: metric{k="v",...} → { k: v }
+      const labelMatch = s.name?.match(/\{(.+)\}$/);
+      const labels: Record<string, string> = {};
+      if (labelMatch) {
+        for (const pair of labelMatch[1].matchAll(/(\w+)="([^"]*)"/g)) {
+          labels[pair[1]] = pair[2];
+        }
       }
-    }
+      const metricName = s.name?.replace(/\{.*\}$/, "") || refId;
+
+      return {
+        name: metricName,
+        labels,
+        // points format: [value, timestamp_ms]
+        datapoints: (s.points || []).map(([value, timestamp]: [number | null, number]) => ({
+          timestamp,
+          value,
+        })),
+      };
+    });
 
     return { refId, series };
   });
