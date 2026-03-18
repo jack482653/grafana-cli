@@ -172,18 +172,28 @@ export async function getDashboard(config: ServerConfig, uid: string): Promise<D
 }
 
 /**
- * Resolve a datasource string name to its numeric id via /api/datasources/name/:name.
- * Returns undefined if the API call fails (e.g. insufficient permissions).
+ * Fetch datasource map (name → id) from /api/frontend/settings.
+ * This endpoint is accessible to all authenticated users including Viewers,
+ * unlike /api/datasources which requires Editor/Admin.
  */
-async function resolveDatasourceId(
+async function fetchDatasourceMap(
   client: AxiosInstance,
-  name: string,
-): Promise<number | undefined> {
+): Promise<{ byName: Record<string, number>; defaultId?: number }> {
   try {
-    const resp = await client.get<any>(`/api/datasources/name/${encodeURIComponent(name)}`);
-    return resp.data.id as number;
+    const resp = await client.get<any>("/api/frontend/settings");
+    const datasources: Record<string, any> = resp.data.datasources || {};
+    const byName: Record<string, number> = {};
+    let defaultId: number | undefined;
+
+    for (const [name, ds] of Object.entries(datasources)) {
+      if (ds.id) {
+        byName[name] = ds.id;
+        if (ds.isDefault) defaultId = ds.id;
+      }
+    }
+    return { byName, defaultId };
   } catch {
-    return undefined;
+    return { byName: {} };
   }
 }
 
@@ -223,29 +233,36 @@ export async function executeQuery(
   let datasourceId: number | undefined;
 
   if (datasourceOverride) {
+    // Explicit override: numeric id used directly, name looked up via frontend/settings
     if (/^\d+$/.test(datasourceOverride)) {
       datasourceId = parseInt(datasourceOverride, 10);
     } else {
-      datasourceId = await resolveDatasourceId(client, datasourceOverride);
+      const { byName } = await fetchDatasourceMap(client);
+      datasourceId = byName[datasourceOverride];
       if (!datasourceId) {
-        console.error(`Error: Cannot resolve datasource "${datasourceOverride}".`);
-        console.error("Your API key may not have permission to look up datasources.");
-        console.error("Use the numeric datasource ID instead: --datasource <id>");
+        console.error(`Error: Datasource "${datasourceOverride}" not found.`);
+        console.error("Available datasources can be found in Grafana → Configuration → Data Sources.");
         process.exit(1);
       }
     }
-  } else if (typeof panel.datasource === "string" && panel.datasource) {
-    datasourceId = await resolveDatasourceId(client, panel.datasource);
-  } else if (panel.datasource && typeof panel.datasource === "object" && (panel.datasource as any).id) {
-    datasourceId = (panel.datasource as any).id;
-  }
+  } else {
+    // Auto-resolve: use frontend/settings to find the datasource
+    const { byName, defaultId } = await fetchDatasourceMap(client);
 
-  if (!datasourceId) {
-    console.error("Error: Cannot determine datasource ID for this panel.");
-    console.error("The panel uses the default datasource, but it cannot be resolved automatically.");
-    console.error("Specify it manually: --datasource <numeric-id>");
-    console.error("Find the ID in Grafana → Configuration → Data Sources → select datasource → check the URL (id=N).");
-    process.exit(1);
+    if (panel.datasource && typeof panel.datasource === "object" && (panel.datasource as any).id) {
+      datasourceId = (panel.datasource as any).id;
+    } else if (typeof panel.datasource === "string" && panel.datasource) {
+      datasourceId = byName[panel.datasource];
+    } else {
+      // null = default datasource
+      datasourceId = defaultId;
+    }
+
+    if (!datasourceId) {
+      console.error("Error: Cannot determine datasource ID for this panel.");
+      console.error("Specify it manually: --datasource <id|name>");
+      process.exit(1);
+    }
   }
 
   const applyVars = (s?: string) =>
