@@ -172,6 +172,45 @@ export async function getDashboard(config: ServerConfig, uid: string): Promise<D
 }
 
 /**
+ * Resolve a datasource reference to an object with { type, uid }.
+ *
+ * Grafana v7.5 panels store datasource as a plain string name (e.g. "Prometheus")
+ * or null (= default), but POST /api/ds/query requires { type, uid }.
+ */
+async function resolveDatasource(
+  client: AxiosInstance,
+  datasource: string | { type?: string; uid?: string } | null | undefined,
+): Promise<{ type?: string; uid: string } | undefined> {
+  // Already has uid — use as-is
+  if (datasource && typeof datasource === "object" && datasource.uid) {
+    return datasource as { type?: string; uid: string };
+  }
+
+  // String name — look up by name
+  if (typeof datasource === "string" && datasource) {
+    try {
+      const resp = await client.get<any>(
+        `/api/datasources/name/${encodeURIComponent(datasource)}`,
+      );
+      return { type: resp.data.type, uid: resp.data.uid };
+    } catch {
+      return undefined;
+    }
+  }
+
+  // null / undefined — find default datasource
+  try {
+    const resp = await client.get<any[]>("/api/datasources");
+    const ds = resp.data.find((d: any) => d.isDefault) ?? resp.data[0];
+    if (ds) return { type: ds.type, uid: ds.uid };
+  } catch {
+    // ignore
+  }
+
+  return undefined;
+}
+
+/**
  * Execute panel queries via Grafana datasource proxy (POST /api/ds/query)
  */
 export async function executeQuery(
@@ -196,26 +235,31 @@ export async function executeQuery(
     process.exit(1);
   }
 
-  // Apply variable substitution and build query objects
-  const queries = panel.targets.map((target) => {
-    const datasource = target.datasource ?? panel.datasource;
-    const applyVars = (s?: string) =>
-      s?.replace(/\$(\w+)/g, (_, name: string) => variables[name] ?? `$${name}`);
-
-    return {
-      refId: target.refId,
-      datasource,
-      expr: applyVars(target.expr),
-      query: applyVars(target.query),
-      queryType: target.queryType,
-      instant: false,
-      range: true,
-      intervalMs: 30000,
-      maxDataPoints: 1000,
-    };
-  });
-
   const client = createClient(config);
+
+  // Resolve panel-level datasource once (fallback for targets without their own)
+  const panelDs = await resolveDatasource(client, panel.datasource);
+
+  const applyVars = (s?: string) =>
+    s?.replace(/\$(\w+)/g, (_, name: string) => variables[name] ?? `$${name}`);
+
+  // Resolve each target's datasource, falling back to panel's
+  const queries = await Promise.all(
+    panel.targets.map(async (target) => {
+      const ds = (await resolveDatasource(client, target.datasource)) ?? panelDs;
+      return {
+        refId: target.refId,
+        datasource: ds,
+        expr: applyVars(target.expr),
+        query: applyVars(target.query),
+        queryType: target.queryType,
+        instant: false,
+        range: true,
+        intervalMs: 30000,
+        maxDataPoints: 1000,
+      };
+    }),
+  );
 
   let rawResults: Record<string, any>;
   try {
