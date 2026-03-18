@@ -192,7 +192,8 @@ async function fetchDatasourceMap(
       }
     }
     return { byName, defaultId };
-  } catch {
+  } catch (err) {
+    console.error(`Warning: Failed to fetch datasource list: ${err instanceof Error ? err.message : String(err)}`);
     return { byName: {} };
   }
 }

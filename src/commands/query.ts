@@ -133,12 +133,10 @@ export function createQueryCommand(): Command {
               columns: [
                 { key: "timestamp", header: "TIMESTAMP", width: 22 },
                 { key: "value", header: "VALUE", width: 16 },
-                { key: "labels", header: "LABELS", width: 40 },
               ],
               data: series.datapoints.map((dp) => ({
                 timestamp: new Date(dp.timestamp).toISOString().replace("T", " ").slice(0, 19),
                 value: dp.value !== null ? String(dp.value) : "null",
-                labels: labelStr,
               })),
             }),
           );
