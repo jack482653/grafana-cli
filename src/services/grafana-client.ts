@@ -1,6 +1,31 @@
 import axios, { type AxiosError, type AxiosInstance } from "axios";
 
-import type { Dashboard, ServerConfig, ServerStatus } from "../types/index.js";
+import type { Dashboard, QueryResult, ServerConfig, ServerStatus, TimeSeries } from "../types/index.js";
+
+interface GrafanaDatasourceInfo {
+  id: number;
+  type: string;
+  isDefault?: boolean;
+}
+
+interface GrafanaFrontendSettings {
+  datasources: Record<string, GrafanaDatasourceInfo>;
+}
+
+interface TsdbSeries {
+  name: string;
+  points: [number | null, number][]; // [value, timestamp_ms]
+}
+
+interface TsdbQueryResult {
+  refId?: string;
+  series?: TsdbSeries[];
+  error?: string;
+}
+
+interface TsdbQueryResponse {
+  results: Record<string, TsdbQueryResult>;
+}
 
 /**
  * Create axios HTTP client for Grafana API
@@ -169,4 +194,168 @@ export async function getDashboard(config: ServerConfig, uid: string): Promise<D
     }
     handleError(error, config.url);
   }
+}
+
+/**
+ * Fetch datasource map (name → id) from /api/frontend/settings.
+ * This endpoint is accessible to all authenticated users including Viewers,
+ * unlike /api/datasources which requires Editor/Admin.
+ */
+async function fetchDatasourceMap(
+  client: AxiosInstance,
+): Promise<{ byName: Record<string, number>; defaultId?: number }> {
+  try {
+    const resp = await client.get<GrafanaFrontendSettings>("/api/frontend/settings");
+    const datasources = resp.data.datasources || {};
+    const byName: Record<string, number> = {};
+    let defaultId: number | undefined;
+
+    for (const [name, ds] of Object.entries(datasources)) {
+      if (ds.id) {
+        byName[name] = ds.id;
+        if (ds.isDefault) defaultId = ds.id;
+      }
+    }
+    return { byName, defaultId };
+  } catch (err) {
+    console.error(`Warning: Failed to fetch datasource list: ${err instanceof Error ? err.message : String(err)}`);
+    return { byName: {} };
+  }
+}
+
+/**
+ * Execute panel queries via Grafana v7.5 legacy endpoint (POST /api/tsdb/query).
+ *
+ * The newer /api/ds/query endpoint requires datasource UIDs which were introduced
+ * in Grafana 8.x. For v7.5 compatibility we use /api/tsdb/query with datasourceId
+ * (numeric). Response format: results[refId].series[].{ name, points: [value, ts][] }
+ */
+export async function executeQuery(
+  config: ServerConfig,
+  dashboardUid: string,
+  panelId: number,
+  timeRange: { from: number; to: number },
+  variables: Record<string, string> = {},
+  signal?: AbortSignal,
+  datasourceOverride?: string,
+): Promise<QueryResult[]> {
+  const dashboard = await getDashboard(config, dashboardUid);
+  const panel = (dashboard.panels || []).find((p) => p.id === panelId);
+
+  if (!panel) {
+    console.error(`Error: Panel ${panelId} not found in dashboard "${dashboard.title}"`);
+    console.error("List panels with: grafana-cli dashboard get " + dashboardUid);
+    process.exit(1);
+  }
+
+  if (!panel.targets || panel.targets.length === 0) {
+    console.error(`Error: Panel ${panelId} has no queries.`);
+    process.exit(1);
+  }
+
+  const client = createClient(config);
+
+  // Resolve datasource to numeric id
+  let datasourceId: number | undefined;
+
+  if (datasourceOverride) {
+    // Explicit override: numeric id used directly, name looked up via frontend/settings
+    if (/^\d+$/.test(datasourceOverride)) {
+      datasourceId = parseInt(datasourceOverride, 10);
+    } else {
+      const { byName } = await fetchDatasourceMap(client);
+      datasourceId = byName[datasourceOverride];
+      if (!datasourceId) {
+        console.error(`Error: Datasource "${datasourceOverride}" not found.`);
+        console.error("Available datasources can be found in Grafana → Configuration → Data Sources.");
+        process.exit(1);
+      }
+    }
+  } else {
+    // Auto-resolve: use frontend/settings to find the datasource
+    const { byName, defaultId } = await fetchDatasourceMap(client);
+
+    if (panel.datasource && typeof panel.datasource === "object" && panel.datasource.id) {
+      datasourceId = panel.datasource.id;
+    } else if (typeof panel.datasource === "string" && panel.datasource) {
+      datasourceId = byName[panel.datasource];
+    } else {
+      // null = default datasource
+      datasourceId = defaultId;
+    }
+
+    if (!datasourceId) {
+      console.error("Error: Cannot determine datasource ID for this panel.");
+      console.error("Specify it manually: --datasource <id|name>");
+      process.exit(1);
+    }
+  }
+
+  const applyVars = (s?: string) =>
+    s?.replace(/\$(\w+)/g, (_, name: string) => variables[name] ?? `$${name}`);
+
+  const queries = panel.targets.map((target) => ({
+    refId: target.refId,
+    datasourceId,
+    expr: applyVars(target.expr),
+    query: applyVars(target.query),
+    queryType: target.queryType,
+    intervalMs: 30000,
+    maxDataPoints: 1000,
+  }));
+
+  let rawResults: Record<string, TsdbQueryResult>;
+  try {
+    const response = await client.post<TsdbQueryResponse>(
+      "/api/tsdb/query",
+      {
+        queries,
+        from: String(timeRange.from),
+        to: String(timeRange.to),
+      },
+      { signal },
+    );
+    rawResults = response.data.results;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 400) {
+      console.error("Error: Query syntax error.");
+      if (error.response.data?.message) {
+        console.error(`Message: ${error.response.data.message}`);
+      }
+      process.exit(1);
+    }
+    handleError(error, config.url);
+  }
+
+  // Parse /api/tsdb/query response: results[refId].series[].{ name, points: [value, ts][] }
+  return Object.entries(rawResults).map(([refId, result]) => {
+    if (result.error) {
+      console.error(`Warning: Query ${refId} failed: ${result.error}`);
+      return { refId, series: [] };
+    }
+
+    const series: TimeSeries[] = (result.series || []).map((s: TsdbSeries) => {
+      // Parse labels from series name: metric{k="v",...} → { k: v }
+      const labelMatch = s.name?.match(/\{(.+)\}$/);
+      const labels: Record<string, string> = {};
+      if (labelMatch) {
+        for (const pair of labelMatch[1].matchAll(/(\w+)="([^"]*)"/g)) {
+          labels[pair[1]] = pair[2];
+        }
+      }
+      const metricName = s.name?.replace(/\{.*\}$/, "") || refId;
+
+      return {
+        name: metricName,
+        labels,
+        // points format: [value, timestamp_ms]
+        datapoints: (s.points || []).map(([value, timestamp]: [number | null, number]) => ({
+          timestamp,
+          value,
+        })),
+      };
+    });
+
+    return { refId, series };
+  });
 }
