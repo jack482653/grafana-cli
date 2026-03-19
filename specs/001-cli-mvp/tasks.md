@@ -151,23 +151,23 @@
 
 ### Contract Tests for User Story 4 (Required by Constitution)
 
-- [ ] T049 [P] [US4] Contract test for GET /api/alerts in tests/contract/alerts.test.ts (test returns 200 with array of alerts, verify fields: id, name, state, dashboardId, panelId, folderTitle)
-- [ ] T050 [P] [US4] Contract test for GET /api/alerts with state filter in tests/contract/alerts.test.ts (test ?state=alerting returns only alerting alerts, test ?state=ok returns only ok alerts)
-- [ ] T051 [P] [US4] Contract test for GET /api/alerts/:id in tests/contract/alerts.test.ts (test returns 200 with alert object containing settings.conditions array, verify condition structure)
-- [ ] T052 [P] [US4] Contract test for alert not found in tests/contract/alerts.test.ts (test GET /api/alerts/9999 returns 404)
+- [x] T049 [P] [US4] Contract test for GET /api/alerts in tests/contract/alerts.test.ts (test returns 200 with array of alerts, verify fields: id, name, state, dashboardId, panelId, folderTitle)
+- [x] T050 [P] [US4] Contract test for GET /api/alerts with state filter in tests/contract/alerts.test.ts (test ?state=alerting returns only alerting alerts, test ?state=ok returns only ok alerts)
+- [x] T051 [P] [US4] Contract test for GET /api/alerts/:id in tests/contract/alerts.test.ts (test returns 200 with alert object containing settings.conditions array, verify condition structure)
+- [x] T052 [P] [US4] Contract test for alert not found in tests/contract/alerts.test.ts (test GET /api/alerts/9999 returns 404)
 
 ### Integration Tests for User Story 4 (Required by Constitution)
 
-- [ ] T053 [P] [US4] Integration test for alert flow in tests/integration/alert-flow.test.ts (test alert list → alert list --state alerting → alert get [id] → verify output contains alert state and conditions)
+- [x] T053 [P] [US4] Integration test for alert flow in tests/integration/alert-flow.test.ts (test alert list → alert list --state alerting → alert get [id] → verify output contains alert state and conditions)
 
 ### Implementation for User Story 4
 
-- [ ] T054 [P] [US4] Create alert command in src/commands/alert.ts (createAlertCommand factory, subcommands: list [--state] [--folder] [--server] [--json], get [id] [--server] [--json])
-- [ ] T055 [US4] Implement listAlerts service in src/services/grafana-client.ts (fetch GET /api/alerts with query params, return Alert[], handle filters: state, folderId, query)
-- [ ] T056 [US4] Implement getAlert service in src/services/grafana-client.ts (fetch GET /api/alerts/:id, return Alert object with settings, handle 404 not found)
-- [ ] T057 [US4] Register alert command in src/index.ts (import createAlertCommand, call program.addCommand)
-- [ ] T058 [US4] Add alert list table formatting in src/commands/alert.ts (format alert list output with columns: ID, NAME, STATE, DASHBOARD, FOLDER - use formatTable from formatters)
-- [ ] T059 [US4] Add alert get output formatting in src/commands/alert.ts (format alert details with state, message, conditions summary, evaluation frequency, notification channels)
+- [x] T054 [P] [US4] Create alert command in src/commands/alert.ts (createAlertCommand factory, subcommands: list [--state] [--folder] [--server] [--json], get [id] [--server] [--json])
+- [x] T055 [US4] Implement listAlerts service in src/services/grafana-client.ts (fetch GET /api/alerts with query params, return Alert[], handle filters: state, folderId, query)
+- [x] T056 [US4] Implement getAlert service in src/services/grafana-client.ts (fetch GET /api/alerts/:id, return Alert object with settings, handle 404 not found)
+- [x] T057 [US4] Register alert command in src/index.ts (import createAlertCommand, call program.addCommand)
+- [x] T058 [US4] Add alert list table formatting in src/commands/alert.ts (format alert list output with columns: ID, NAME, STATE, DASHBOARD, FOLDER - use formatTable from formatters)
+- [x] T059 [US4] Add alert get output formatting in src/commands/alert.ts (format alert details with state, message, conditions summary, evaluation frequency, notification channels)
 
 **Checkpoint**: All user stories should now be independently functional - full MVP feature set complete
 

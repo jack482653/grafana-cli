@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 
+import { createAlertCommand } from "./commands/alert.js";
 import { createConfigCommand } from "./commands/config.js";
 import { createDashboardCommand } from "./commands/dashboard.js";
 import { createQueryCommand } from "./commands/query.js";
@@ -18,5 +19,6 @@ program.addCommand(createConfigCommand());
 program.addCommand(createStatusCommand());
 program.addCommand(createDashboardCommand());
 program.addCommand(createQueryCommand());
+program.addCommand(createAlertCommand());
 
 program.parse();

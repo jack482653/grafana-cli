@@ -75,6 +75,25 @@ export interface Alert {
   message?: string;
 }
 
+export interface AlertCondition {
+  evaluator: { type: string; params: number[] };
+  reducer: { type: string };
+  query: { params: string[] };
+  type: string;
+}
+
+export interface AlertDetail {
+  id: number;
+  name: string;
+  state: AlertState;
+  message: string;
+  frequency: number;
+  forDuration: number;
+  conditions: AlertCondition[];
+  executionError: string;
+  newStateDate: string;
+}
+
 export enum AlertState {
   OK = "ok",
   PAUSED = "paused",

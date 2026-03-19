@@ -1,6 +1,6 @@
 import axios, { type AxiosError, type AxiosInstance } from "axios";
 
-import type { Dashboard, QueryResult, ServerConfig, ServerStatus, TimeSeries } from "../types/index.js";
+import type { Alert, AlertDetail, AlertState, Dashboard, QueryResult, ServerConfig, ServerStatus, TimeSeries } from "../types/index.js";
 
 interface GrafanaDatasourceInfo {
   id: number;
@@ -358,4 +358,54 @@ export async function executeQuery(
 
     return { refId, series };
   });
+}
+
+/**
+ * List alerts with optional filters (GET /api/alerts)
+ */
+export async function listAlerts(
+  config: ServerConfig,
+  filters: { state?: AlertState; query?: string; limit?: number } = {},
+): Promise<Alert[]> {
+  const client = createClient(config);
+  try {
+    const params: Record<string, string | number> = {};
+    if (filters.state) params["state"] = filters.state;
+    if (filters.query) params["query"] = filters.query;
+    if (filters.limit) params["limit"] = filters.limit;
+
+    const response = await client.get<Alert[]>("/api/alerts", { params });
+    return response.data;
+  } catch (error) {
+    handleError(error, config.url);
+  }
+}
+
+/**
+ * Get a single alert by ID (GET /api/alerts/:id)
+ */
+export async function getAlert(config: ServerConfig, id: number): Promise<AlertDetail> {
+  const client = createClient(config);
+  try {
+    const response = await client.get<any>(`/api/alerts/${id}`);
+    const d = response.data;
+    return {
+      id: d.Id,
+      name: d.Name,
+      state: d.State,
+      message: d.Message || "",
+      frequency: d.Frequency,
+      forDuration: d.For,
+      conditions: d.Settings?.conditions || [],
+      executionError: d.ExecutionError || "",
+      newStateDate: d.NewStateDate,
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      console.error(`Error: Alert ${id} not found.`);
+      console.error("List available alerts with: grafana-cli alert list");
+      process.exit(1);
+    }
+    handleError(error, config.url);
+  }
 }
