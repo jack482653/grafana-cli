@@ -1,6 +1,15 @@
 import axios, { type AxiosError, type AxiosInstance } from "axios";
 
-import type { Alert, AlertDetail, AlertState, Dashboard, QueryResult, ServerConfig, ServerStatus, TimeSeries } from "../types/index.js";
+import type {
+  Alert,
+  AlertDetail,
+  AlertState,
+  Dashboard,
+  QueryResult,
+  ServerConfig,
+  ServerStatus,
+  TimeSeries,
+} from "../types/index.js";
 
 interface GrafanaDatasourceInfo {
   id: number;
@@ -104,7 +113,11 @@ export function handleError(error: unknown, serverUrl: string): never {
 }
 
 /**
- * Get server status from Grafana health API
+ * Get server status from Grafana health API (GET /api/health)
+ *
+ * @param config - Server configuration with URL and credentials
+ * @returns Server status including version, database state, and commit hash
+ * @throws Exits process on network error or authentication failure
  */
 export async function getServerStatus(config: ServerConfig): Promise<ServerStatus> {
   const client = createClient(config);
@@ -118,7 +131,12 @@ export async function getServerStatus(config: ServerConfig): Promise<ServerStatu
 }
 
 /**
- * List dashboards from Grafana search API
+ * List dashboards from Grafana search API (GET /api/search)
+ *
+ * @param config - Server configuration
+ * @param filters - Optional filters: folder name (client-side), tag, query string
+ * @returns Array of matching dashboards with uid, title, tags, folderTitle, url
+ * @throws Exits process on network error or authentication failure
  */
 export async function listDashboards(
   config: ServerConfig,
@@ -137,9 +155,7 @@ export async function listDashboards(
     // Filter by folder name client-side (API only supports folderIds)
     if (filters.folder) {
       const folderLower = filters.folder.toLowerCase();
-      results = results.filter(
-        (d) => d.folderTitle?.toLowerCase().includes(folderLower),
-      );
+      results = results.filter((d) => d.folderTitle?.toLowerCase().includes(folderLower));
     }
 
     return results.map((d) => ({
@@ -155,15 +171,18 @@ export async function listDashboards(
 }
 
 /**
- * Get a full dashboard definition by UID
+ * Get a full dashboard definition by UID (GET /api/dashboards/uid/:uid)
+ *
+ * @param config - Server configuration
+ * @param uid - Dashboard UID (e.g. "000000030")
+ * @returns Dashboard with panels and their query targets
+ * @throws Exits process with message if dashboard not found (404)
  */
 export async function getDashboard(config: ServerConfig, uid: string): Promise<Dashboard> {
   const client = createClient(config);
 
   try {
-    const response = await client.get<{ dashboard: any; meta: any }>(
-      `/api/dashboards/uid/${uid}`,
-    );
+    const response = await client.get<{ dashboard: any; meta: any }>(`/api/dashboards/uid/${uid}`);
     const { dashboard, meta } = response.data;
 
     return {
@@ -218,7 +237,9 @@ async function fetchDatasourceMap(
     }
     return { byName, defaultId };
   } catch (err) {
-    console.error(`Warning: Failed to fetch datasource list: ${err instanceof Error ? err.message : String(err)}`);
+    console.error(
+      `Warning: Failed to fetch datasource list: ${err instanceof Error ? err.message : String(err)}`,
+    );
     return { byName: {} };
   }
 }
@@ -267,7 +288,9 @@ export async function executeQuery(
       datasourceId = byName[datasourceOverride];
       if (!datasourceId) {
         console.error(`Error: Datasource "${datasourceOverride}" not found.`);
-        console.error("Available datasources can be found in Grafana → Configuration → Data Sources.");
+        console.error(
+          "Available datasources can be found in Grafana → Configuration → Data Sources.",
+        );
         process.exit(1);
       }
     }
@@ -362,6 +385,11 @@ export async function executeQuery(
 
 /**
  * List alerts with optional filters (GET /api/alerts)
+ *
+ * @param config - Server configuration
+ * @param filters - Optional filters: state (ok/alerting/pending/paused/no_data), query string, limit
+ * @returns Array of Alert objects
+ * @throws Exits process on network error or authentication failure
  */
 export async function listAlerts(
   config: ServerConfig,
@@ -383,6 +411,11 @@ export async function listAlerts(
 
 /**
  * Get a single alert by ID (GET /api/alerts/:id)
+ *
+ * @param config - Server configuration
+ * @param id - Numeric alert ID
+ * @returns AlertDetail with conditions, frequency, and state history
+ * @throws Exits process with message if alert not found (404)
  */
 export async function getAlert(config: ServerConfig, id: number): Promise<AlertDetail> {
   const client = createClient(config);

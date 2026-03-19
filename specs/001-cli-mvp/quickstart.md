@@ -15,11 +15,13 @@ This guide helps you set up your development environment, understand the project
 ### Required
 
 - **Node.js 18+** (LTS version recommended)
+
   ```bash
   node --version  # Should be v18.x or higher
   ```
 
 - **pnpm 10.15.1+** (package manager)
+
   ```bash
   npm install -g pnpm
   pnpm --version  # Should be 10.15.1 or higher
@@ -68,6 +70,7 @@ node dist/index.js status
 ```
 
 Expected output:
+
 ```
 Server Status: http://localhost:3000
 
@@ -128,6 +131,7 @@ grafana-cli/
 ```
 
 **Key Principles**:
+
 - **Commands**: Thin orchestration layer, no business logic
 - **Services**: Business logic, testable independently
 - **Formatters**: Output rendering, swappable (JSON vs. table)
@@ -140,6 +144,7 @@ grafana-cli/
 ### Adding a New Command
 
 1. **Define types** in `src/types/index.ts`
+
    ```typescript
    export interface MyEntity {
      id: number;
@@ -148,6 +153,7 @@ grafana-cli/
    ```
 
 2. **Create service** in `src/services/my-service.ts`
+
    ```typescript
    import type { MyEntity } from "../types/index.js";
 
@@ -157,10 +163,12 @@ grafana-cli/
    ```
 
 3. **Create command** in `src/commands/my-command.ts`
+
    ```typescript
    import { Command } from "commander";
-   import { fetchMyEntity } from "../services/my-service.js";
+
    import { formatJson } from "../formatters/json.js";
+   import { fetchMyEntity } from "../services/my-service.js";
 
    export function createMyCommand(): Command {
      const cmd = new Command("my-command");
@@ -181,6 +189,7 @@ grafana-cli/
    ```
 
 4. **Register command** in `src/index.ts`
+
    ```typescript
    import { createMyCommand } from "./commands/my-command.js";
 
@@ -188,8 +197,10 @@ grafana-cli/
    ```
 
 5. **Write tests** in `tests/`
+
    ```typescript
-   import { describe, it, expect } from "vitest";
+   import { describe, expect, it } from "vitest";
+
    import { fetchMyEntity } from "../src/services/my-service.js";
 
    describe("fetchMyEntity", () => {
@@ -229,6 +240,7 @@ pnpm format
 ```
 
 **Prettier rules** (from `.prettierrc`):
+
 - Semicolons: Yes
 - Quotes: Double quotes
 - Tab width: 2 spaces
@@ -266,14 +278,15 @@ Contract tests verify our client code matches Grafana HTTP API v7.5 behavior.
 
 ```typescript
 // tests/contract/health.test.ts
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
+
 import { createClient } from "../src/services/grafana-client.js";
 
 describe("Health API Contract", () => {
   it("GET /api/health returns version and database status", async () => {
     const client = createClient({
       url: "http://localhost:3000",
-      apiKey: process.env.GRAFANA_API_KEY
+      apiKey: process.env.GRAFANA_API_KEY,
     });
 
     const response = await client.get("/api/health");
@@ -292,31 +305,25 @@ Integration tests verify complete user journeys work end-to-end.
 
 ```typescript
 // tests/integration/config-flow.test.ts
-import { describe, it, expect } from "vitest";
 import { execSync } from "child_process";
+import { describe, expect, it } from "vitest";
 
 describe("Config Flow", () => {
   it("should configure server, verify status, and list config", () => {
     // Set config
     const setOutput = execSync(
-      'node dist/index.js config set --url http://localhost:3000 --api-key test123 --name test',
-      { encoding: 'utf-8' }
+      "node dist/index.js config set --url http://localhost:3000 --api-key test123 --name test",
+      { encoding: "utf-8" },
     );
     expect(setOutput).toContain("Configuration saved");
 
     // Verify status
-    const statusOutput = execSync(
-      'node dist/index.js status',
-      { encoding: 'utf-8' }
-    );
+    const statusOutput = execSync("node dist/index.js status", { encoding: "utf-8" });
     expect(statusOutput).toContain("VERSION");
     expect(statusOutput).toContain("DATABASE");
 
     // List config
-    const listOutput = execSync(
-      'node dist/index.js config list',
-      { encoding: 'utf-8' }
-    );
+    const listOutput = execSync("node dist/index.js config list", { encoding: "utf-8" });
     expect(listOutput).toContain("test");
     expect(listOutput).toContain("http://localhost:3000");
   });
@@ -376,6 +383,7 @@ grafana-cli follows Clean Architecture principles with a simplified structure fo
 ```
 
 **Layer Rules**:
+
 1. **Commands depend on Services**: Commands call services, services never call commands
 2. **Services are testable**: Services have no dependency on CLI framework (commander)
 3. **No business logic in Commands**: Commands only orchestrate and format output
@@ -407,6 +415,7 @@ export function handleError(error: unknown, serverUrl: string): never {
 ```
 
 **Exit Codes**:
+
 - `0`: Success
 - `1`: General error
 - `2`: Authentication error

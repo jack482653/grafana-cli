@@ -63,24 +63,24 @@ Accept: application/json
 
 **Request Fields**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `queries` | `Query[]` | Yes | Array of queries to execute |
-| `from` | `string` | Yes | Start time (Unix timestamp in milliseconds) |
-| `to` | `string` | Yes | End time (Unix timestamp in milliseconds) |
+| Field     | Type      | Required | Description                                 |
+| --------- | --------- | -------- | ------------------------------------------- |
+| `queries` | `Query[]` | Yes      | Array of queries to execute                 |
+| `from`    | `string`  | Yes      | Start time (Unix timestamp in milliseconds) |
+| `to`      | `string`  | Yes      | End time (Unix timestamp in milliseconds)   |
 
 **Query Object**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `refId` | `string` | Yes | Query reference ID (A, B, C, ...) |
-| `datasource` | `object` | Yes | Datasource config `{type, uid}` |
-| `expr` | `string` | Conditional | PromQL expression (for Prometheus) |
-| `query` | `string` | Conditional | Query string (for other datasources) |
-| `instant` | `boolean` | No | Instant query (default: false) |
-| `range` | `boolean` | No | Range query (default: true) |
-| `intervalMs` | `number` | No | Step interval in milliseconds |
-| `maxDataPoints` | `number` | No | Max data points to return |
+| Field           | Type      | Required    | Description                          |
+| --------------- | --------- | ----------- | ------------------------------------ |
+| `refId`         | `string`  | Yes         | Query reference ID (A, B, C, ...)    |
+| `datasource`    | `object`  | Yes         | Datasource config `{type, uid}`      |
+| `expr`          | `string`  | Conditional | PromQL expression (for Prometheus)   |
+| `query`         | `string`  | Conditional | Query string (for other datasources) |
+| `instant`       | `boolean` | No          | Instant query (default: false)       |
+| `range`         | `boolean` | No          | Range query (default: true)          |
+| `intervalMs`    | `number`  | No          | Step interval in milliseconds        |
+| `maxDataPoints` | `number`  | No          | Max data points to return            |
 
 **Success Response (200 OK)**
 
@@ -97,13 +97,13 @@ Accept: application/json
               {
                 "name": "Time",
                 "type": "time",
-                "typeInfo": {"frame": "time.Time"}
+                "typeInfo": { "frame": "time.Time" }
               },
               {
                 "name": "Value",
                 "type": "number",
-                "typeInfo": {"frame": "float64"},
-                "labels": {"instance": "server01", "cpu": "0"}
+                "typeInfo": { "frame": "float64" },
+                "labels": { "instance": "server01", "cpu": "0" }
               }
             ]
           },
@@ -130,7 +130,7 @@ Accept: application/json
               {
                 "name": "Value",
                 "type": "number",
-                "labels": {"instance": "server01"}
+                "labels": { "instance": "server01" }
               }
             ]
           },
@@ -149,37 +149,37 @@ Accept: application/json
 
 **Response Fields**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `results` | `object` | Map of refId → query result |
-| `results[refId].status` | `number` | HTTP status for this query (200 = success) |
-| `results[refId].frames` | `Frame[]` | Array of data frames (time-series) |
+| Field                   | Type      | Description                                |
+| ----------------------- | --------- | ------------------------------------------ |
+| `results`               | `object`  | Map of refId → query result                |
+| `results[refId].status` | `number`  | HTTP status for this query (200 = success) |
+| `results[refId].frames` | `Frame[]` | Array of data frames (time-series)         |
 
 **Frame Structure**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `schema.name` | `string` | Series name |
-| `schema.fields` | `Field[]` | Field definitions (Time, Value, labels) |
-| `data.values` | `array[]` | 2D array: first array is timestamps, subsequent arrays are values |
+| Field           | Type      | Description                                                       |
+| --------------- | --------- | ----------------------------------------------------------------- |
+| `schema.name`   | `string`  | Series name                                                       |
+| `schema.fields` | `Field[]` | Field definitions (Time, Value, labels)                           |
+| `data.values`   | `array[]` | 2D array: first array is timestamps, subsequent arrays are values |
 
 **Field Structure**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | `string` | Field name (Time, Value, etc.) |
-| `type` | `string` | Field type (time, number, string) |
-| `labels` | `object` | Labels/tags for this series |
+| Field    | Type     | Description                       |
+| -------- | -------- | --------------------------------- |
+| `name`   | `string` | Field name (Time, Value, etc.)    |
+| `type`   | `string` | Field type (time, number, string) |
+| `labels` | `object` | Labels/tags for this series       |
 
 **Error Responses**
 
-| Status | Description | Response Body |
-|--------|-------------|---------------|
-| 400 Bad Request | Invalid query syntax | `{"message": "invalid query", "error": "parse error"}` |
-| 401 Unauthorized | Invalid or missing API key | `{"message": "Unauthorized"}` |
-| 403 Forbidden | Insufficient datasource permissions | `{"message": "Permission denied"}` |
-| 500 Internal Server Error | Datasource query failed | `{"message": "Query execution failed", "error": "..."}` |
-| 504 Gateway Timeout | Query timeout | `{"message": "Query timeout"}` |
+| Status                    | Description                         | Response Body                                           |
+| ------------------------- | ----------------------------------- | ------------------------------------------------------- |
+| 400 Bad Request           | Invalid query syntax                | `{"message": "invalid query", "error": "parse error"}`  |
+| 401 Unauthorized          | Invalid or missing API key          | `{"message": "Unauthorized"}`                           |
+| 403 Forbidden             | Insufficient datasource permissions | `{"message": "Permission denied"}`                      |
+| 500 Internal Server Error | Datasource query failed             | `{"message": "Query execution failed", "error": "..."}` |
+| 504 Gateway Timeout       | Query timeout                       | `{"message": "Query timeout"}`                          |
 
 **Partial Errors**
 
@@ -250,16 +250,24 @@ TIMESTAMP             VALUE     LABELS
       "refId": "A",
       "expr": "rate(cpu_usage_seconds_total{instance=\"server01\"}[5m])",
       "datapoints": [
-        {"timestamp": 1609459200000, "value": 0.23, "labels": {"instance": "server01", "cpu": "0"}},
-        {"timestamp": 1609459230000, "value": 0.25, "labels": {"instance": "server01", "cpu": "0"}}
+        {
+          "timestamp": 1609459200000,
+          "value": 0.23,
+          "labels": { "instance": "server01", "cpu": "0" }
+        },
+        {
+          "timestamp": 1609459230000,
+          "value": 0.25,
+          "labels": { "instance": "server01", "cpu": "0" }
+        }
       ]
     },
     {
       "refId": "B",
       "expr": "memory_usage_bytes{instance=\"server01\"} / 1024 / 1024",
       "datapoints": [
-        {"timestamp": 1609459200000, "value": 2048.5, "labels": {"instance": "server01"}},
-        {"timestamp": 1609459230000, "value": 2050.2, "labels": {"instance": "server01"}}
+        { "timestamp": 1609459200000, "value": 2048.5, "labels": { "instance": "server01" } },
+        { "timestamp": 1609459230000, "value": 2050.2, "labels": { "instance": "server01" } }
       ]
     }
   ]
@@ -270,14 +278,14 @@ TIMESTAMP             VALUE     LABELS
 
 CLI supports Grafana's relative time syntax and absolute times:
 
-| Input | Interpretation |
-|-------|----------------|
-| `now-1h` | 1 hour ago |
-| `now-24h` | 24 hours ago |
-| `now-7d` | 7 days ago |
-| `now` | Current time |
-| `2021-01-01T00:00:00Z` | ISO 8601 absolute time |
-| `1609459200` | Unix timestamp (seconds) |
+| Input                  | Interpretation           |
+| ---------------------- | ------------------------ |
+| `now-1h`               | 1 hour ago               |
+| `now-24h`              | 24 hours ago             |
+| `now-7d`               | 7 days ago               |
+| `now`                  | Current time             |
+| `2021-01-01T00:00:00Z` | ISO 8601 absolute time   |
+| `1609459200`           | Unix timestamp (seconds) |
 
 **Template Variables (Future)**
 

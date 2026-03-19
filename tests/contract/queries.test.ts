@@ -128,8 +128,24 @@ describe.skipIf(!hasTestServer)("Query API Contract", () => {
 
     const response = await client.post("/api/ds/query", {
       queries: [
-        { refId: "A", datasource: ds, expr: target.expr, query: target.query, range: true, intervalMs: 30000, maxDataPoints: 50 },
-        { refId: "B", datasource: ds, expr: target.expr, query: target.query, range: true, intervalMs: 30000, maxDataPoints: 50 },
+        {
+          refId: "A",
+          datasource: ds,
+          expr: target.expr,
+          query: target.query,
+          range: true,
+          intervalMs: 30000,
+          maxDataPoints: 50,
+        },
+        {
+          refId: "B",
+          datasource: ds,
+          expr: target.expr,
+          query: target.query,
+          range: true,
+          intervalMs: 30000,
+          maxDataPoints: 50,
+        },
       ],
       from,
       to,

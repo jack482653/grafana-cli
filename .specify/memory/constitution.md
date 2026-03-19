@@ -55,6 +55,7 @@ Sync Impact Report:
 - External dependencies (axios, fs) isolated behind interfaces for testability
 
 **Enforcement**:
+
 - PR reviews MUST verify: Is business logic in domain/use cases or leaked into CLI handlers?
 - PR reviews MUST verify: Are external dependencies directly imported in use cases, or abstracted?
 - PR reviews MUST verify: Is this adding complexity without solving a current problem?
@@ -73,6 +74,7 @@ Sync Impact Report:
 - **Test pyramid for MVP**: Few contract tests (API surface) → More integration tests (user journeys) → Unit tests only when needed
 
 **What NOT to test for MVP**:
+
 - Trivial getters/setters
 - Framework code (commander already tested by its maintainers)
 - Code with no conditional logic
@@ -90,6 +92,7 @@ Sync Impact Report:
 - **Progress feedback**: Long-running operations (>1s) MUST show progress to stderr
 
 **Measurement**:
+
 - Profile commands during development: `time grafana-cli <command>`
 - Monitor memory: `ps aux` during command execution
 - Track API call counts: log HTTP requests during integration tests
@@ -101,17 +104,20 @@ Sync Impact Report:
 ### Quality Gates
 
 **Pre-commit**:
+
 - Code MUST pass formatting (Prettier) and type checking (TypeScript strict mode)
 - Linting: ESLint is deferred until MVP ships; TypeScript strict mode serves as the primary static analysis gate for MVP
 - No debug `console.log` in committed code (remove or replace with intentional output). Note: CLI commands legitimately use `console.log` for stdout output and `console.error` for stderr — these are NOT debug logs and are permitted per Principle II (CLI-First Interface)
 
 **Pre-PR**:
+
 - All contract tests MUST pass
 - All integration tests for changed features MUST pass
 - New API integrations MUST include contract tests
 - New user journeys MUST include integration tests
 
 **Code Review Requirements**:
+
 - Reviewer MUST verify constitution compliance (especially Principle I: MVP-First)
 - Reviewer MUST challenge any abstractions not solving current problems
 - Reviewer MUST verify test coverage for contracts and user journeys

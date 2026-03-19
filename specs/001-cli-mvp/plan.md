@@ -11,6 +11,7 @@ Build a command-line interface for Grafana v7.5 that enables DevOps and SRE team
 
 **Language/Version**: Node.js 18+ (LTS), TypeScript 5.x (target: ES2022)
 **Primary Dependencies**:
+
 - `commander` (CLI argument parsing and command structure)
 - `axios` (HTTP client for Grafana REST API)
 - `pnpm` (package manager and Node version management)
@@ -19,6 +20,7 @@ Build a command-line interface for Grafana v7.5 that enables DevOps and SRE team
 
 **Storage**: File system (`~/.grafana-cli/config.json` for server configurations)
 **Testing**:
+
 - Contract tests for Grafana API endpoints (required)
 - Integration tests for user journeys (required)
 - Unit tests for complex logic (optional for MVP)
@@ -27,17 +29,20 @@ Build a command-line interface for Grafana v7.5 that enables DevOps and SRE team
 **Target Platform**: macOS and Linux (primary), Windows via Git Bash or WSL (secondary)
 **Project Type**: Single CLI application (not web/mobile)
 **Performance Goals**:
+
 - Command response time <5 seconds (typical operations)
 - Memory usage <100MB during normal operations
 - Query execution <10 seconds for 1-24 hour time ranges
 
 **Constraints**:
+
 - Grafana HTTP API v7.5 compatibility (see https://grafana.com/docs/grafana/v7.5/http_api/)
 - ESM module system (import/export, not require)
 - CLI-First Interface protocol (stdin/args → stdout, errors → stderr)
 - Exit codes: 0 success, 1 general error, 2 auth error, 3 network error
 
 **Scale/Scope**:
+
 - Single-user, single-process CLI tool
 - Support 3+ server configurations
 - Handle 100+ dashboards per server
@@ -45,7 +50,7 @@ Build a command-line interface for Grafana v7.5 that enables DevOps and SRE team
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+_GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
 ### ✅ Principle I: MVP-First Development (NON-NEGOTIABLE)
 
@@ -192,6 +197,7 @@ No violations detected. Constitution compliance verified.
 ### Research Output Location
 
 All research findings will be documented in `specs/001-cli-mvp/research.md` with format:
+
 - **Decision**: [chosen approach]
 - **Rationale**: [why chosen, trade-offs considered]
 - **Alternatives**: [other options evaluated]
@@ -251,6 +257,7 @@ Generate contract definitions for Grafana HTTP API v7.5 endpoints:
    - `GET /api/alerts/:id` → Get alert by ID
 
 Each contract file includes:
+
 - Endpoint URL and method
 - Request headers (Authorization, Content-Type)
 - Request body schema (if applicable)
@@ -271,6 +278,7 @@ Developer onboarding document:
 ### Agent Context Update
 
 Run `.specify/scripts/bash/update-agent-context.sh claude` to:
+
 - Update agent-specific context file with new technology decisions
 - Preserve manual additions between markers
 - Add: Test framework choice, CLI libraries, architecture patterns

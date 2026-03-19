@@ -50,10 +50,7 @@ describe("Config Flow Integration", () => {
   });
 
   it("first config is set as default automatically", () => {
-    cli(
-      ["config", "set", "--url", "https://grafana.example.com", "--name", "prod"],
-      configPath,
-    );
+    cli(["config", "set", "--url", "https://grafana.example.com", "--name", "prod"], configPath);
 
     const store = JSON.parse(fs.readFileSync(configPath, "utf-8"));
     expect(store.activeConfig).toBe("prod");
@@ -63,10 +60,14 @@ describe("Config Flow Integration", () => {
   it("config set with API key stores it securely", () => {
     cli(
       [
-        "config", "set",
-        "--url", "https://grafana.example.com",
-        "--name", "prod",
-        "--api-key", "secret-key-123",
+        "config",
+        "set",
+        "--url",
+        "https://grafana.example.com",
+        "--name",
+        "prod",
+        "--api-key",
+        "secret-key-123",
       ],
       configPath,
     );
@@ -82,7 +83,10 @@ describe("Config Flow Integration", () => {
   });
 
   it("config delete removes a configuration", () => {
-    cli(["config", "set", "--url", "https://grafana.example.com", "--name", "to-delete"], configPath);
+    cli(
+      ["config", "set", "--url", "https://grafana.example.com", "--name", "to-delete"],
+      configPath,
+    );
     cli(["config", "delete", "to-delete"], configPath);
 
     const listOutput = cli(["config", "list"], configPath);
@@ -99,12 +103,18 @@ describe("Config Flow Integration", () => {
     expect(() =>
       cli(
         [
-          "config", "set",
-          "--url", "https://grafana.example.com",
-          "--name", "bad",
-          "--api-key", "key",
-          "--username", "admin",
-          "--password", "pass",
+          "config",
+          "set",
+          "--url",
+          "https://grafana.example.com",
+          "--name",
+          "bad",
+          "--api-key",
+          "key",
+          "--username",
+          "admin",
+          "--password",
+          "pass",
         ],
         configPath,
       ),
@@ -126,11 +136,7 @@ describe.skipIf(!GRAFANA_TEST_URL)("Status Flow Integration (requires Grafana)",
   });
 
   it("config set → status verifies connectivity and shows version", () => {
-    const args = [
-      "config", "set",
-      "--url", GRAFANA_TEST_URL!,
-      "--name", "test",
-    ];
+    const args = ["config", "set", "--url", GRAFANA_TEST_URL!, "--name", "test"];
     if (process.env["GRAFANA_API_KEY"]) {
       args.push("--api-key", process.env["GRAFANA_API_KEY"]);
     }

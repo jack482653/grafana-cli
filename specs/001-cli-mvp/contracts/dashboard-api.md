@@ -18,13 +18,13 @@ Dashboard endpoints support listing, searching, and retrieving dashboard definit
 
 **Query Parameters**
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `query` | `string` | No | Search query (matches dashboard title, partial match) |
-| `tag` | `string` | No | Filter by tag (can repeat for multiple tags) |
-| `folderIds` | `number` | No | Filter by folder ID (can repeat) |
-| `type` | `string` | No | Filter by type ("dash-db" for dashboards, "dash-folder" for folders) |
-| `limit` | `number` | No | Max results to return (default: 1000) |
+| Parameter   | Type     | Required | Description                                                          |
+| ----------- | -------- | -------- | -------------------------------------------------------------------- |
+| `query`     | `string` | No       | Search query (matches dashboard title, partial match)                |
+| `tag`       | `string` | No       | Filter by tag (can repeat for multiple tags)                         |
+| `folderIds` | `number` | No       | Filter by folder ID (can repeat)                                     |
+| `type`      | `string` | No       | Filter by type ("dash-db" for dashboards, "dash-folder" for folders) |
+| `limit`     | `number` | No       | Max results to return (default: 1000)                                |
 
 **Request Examples**
 
@@ -76,25 +76,25 @@ GET /api/search?folderIds=42&type=dash-db HTTP/1.1
 
 **Response Fields**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `number` | Internal dashboard ID (numeric) |
-| `uid` | `string` | Dashboard UID (preferred identifier) |
-| `title` | `string` | Dashboard title |
-| `url` | `string` | Relative dashboard URL |
-| `type` | `string` | "dash-db" for dashboards, "dash-folder" for folders |
-| `tags` | `string[]` | Dashboard tags |
-| `folderTitle` | `string` | Folder name containing dashboard |
-| `folderId` | `number` | Folder ID |
-| `folderUid` | `string` | Folder UID |
+| Field         | Type       | Description                                         |
+| ------------- | ---------- | --------------------------------------------------- |
+| `id`          | `number`   | Internal dashboard ID (numeric)                     |
+| `uid`         | `string`   | Dashboard UID (preferred identifier)                |
+| `title`       | `string`   | Dashboard title                                     |
+| `url`         | `string`   | Relative dashboard URL                              |
+| `type`        | `string`   | "dash-db" for dashboards, "dash-folder" for folders |
+| `tags`        | `string[]` | Dashboard tags                                      |
+| `folderTitle` | `string`   | Folder name containing dashboard                    |
+| `folderId`    | `number`   | Folder ID                                           |
+| `folderUid`   | `string`   | Folder UID                                          |
 
 **Error Responses**
 
-| Status | Description | Response Body |
-|--------|-------------|---------------|
-| 401 Unauthorized | Invalid or missing API key | `{"message": "Unauthorized"}` |
-| 403 Forbidden | Insufficient permissions | `{"message": "Permission denied"}` |
-| 500 Internal Server Error | Server error | `{"message": "Internal server error"}` |
+| Status                    | Description                | Response Body                          |
+| ------------------------- | -------------------------- | -------------------------------------- |
+| 401 Unauthorized          | Invalid or missing API key | `{"message": "Unauthorized"}`          |
+| 403 Forbidden             | Insufficient permissions   | `{"message": "Permission denied"}`     |
+| 500 Internal Server Error | Server error               | `{"message": "Internal server error"}` |
 
 **CLI Mapping**
 
@@ -121,9 +121,9 @@ xyz789      Application Metrics        Production  monitoring
 
 **Path Parameters**
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `uid` | `string` | Yes | Dashboard UID |
+| Parameter | Type     | Required | Description   |
+| --------- | -------- | -------- | ------------- |
+| `uid`     | `string` | Yes      | Dashboard UID |
 
 **Request**
 
@@ -171,7 +171,7 @@ Accept: application/json
     "panels": [
       {
         "id": 2,
-        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+        "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
         "type": "graph",
         "title": "CPU Usage",
         "datasource": {
@@ -188,7 +188,7 @@ Accept: application/json
       },
       {
         "id": 3,
-        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+        "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
         "type": "graph",
         "title": "Memory Usage",
         "datasource": {
@@ -216,51 +216,51 @@ Accept: application/json
 
 **Response Fields (meta)**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `type` | `string` | "db" for dashboard |
-| `version` | `number` | Dashboard version (increments on save) |
-| `created` | `string` | ISO 8601 creation timestamp |
-| `updated` | `string` | ISO 8601 last update timestamp |
-| `folderId` | `number` | Folder ID |
-| `folderTitle` | `string` | Folder name |
+| Field         | Type     | Description                            |
+| ------------- | -------- | -------------------------------------- |
+| `type`        | `string` | "db" for dashboard                     |
+| `version`     | `number` | Dashboard version (increments on save) |
+| `created`     | `string` | ISO 8601 creation timestamp            |
+| `updated`     | `string` | ISO 8601 last update timestamp         |
+| `folderId`    | `number` | Folder ID                              |
+| `folderTitle` | `string` | Folder name                            |
 
 **Response Fields (dashboard)**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `uid` | `string` | Dashboard UID |
-| `title` | `string` | Dashboard title |
-| `tags` | `string[]` | Dashboard tags |
-| `panels` | `Panel[]` | Array of panel definitions (see Panel structure below) |
-| `templating.list` | `Variable[]` | Template variables (MVP: not used) |
+| Field             | Type         | Description                                            |
+| ----------------- | ------------ | ------------------------------------------------------ |
+| `uid`             | `string`     | Dashboard UID                                          |
+| `title`           | `string`     | Dashboard title                                        |
+| `tags`            | `string[]`   | Dashboard tags                                         |
+| `panels`          | `Panel[]`    | Array of panel definitions (see Panel structure below) |
+| `templating.list` | `Variable[]` | Template variables (MVP: not used)                     |
 
 **Panel Structure**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `number` | Panel ID (unique within dashboard) |
-| `type` | `string` | Panel type (graph, table, stat, gauge, etc.) |
-| `title` | `string` | Panel title |
-| `datasource` | `object` | Datasource config `{type, uid}` |
-| `targets` | `Target[]` | Query targets (see Target structure) |
+| Field        | Type       | Description                                  |
+| ------------ | ---------- | -------------------------------------------- |
+| `id`         | `number`   | Panel ID (unique within dashboard)           |
+| `type`       | `string`   | Panel type (graph, table, stat, gauge, etc.) |
+| `title`      | `string`   | Panel title                                  |
+| `datasource` | `object`   | Datasource config `{type, uid}`              |
+| `targets`    | `Target[]` | Query targets (see Target structure)         |
 
 **Target (Query) Structure**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `refId` | `string` | Query reference ID (A, B, C, ...) |
-| `expr` | `string` | Prometheus PromQL query (for Prometheus datasource) |
-| `query` | `string` | Query string (for other datasources) |
-| `datasource` | `object` | Override datasource for this query (optional) |
+| Field        | Type     | Description                                         |
+| ------------ | -------- | --------------------------------------------------- |
+| `refId`      | `string` | Query reference ID (A, B, C, ...)                   |
+| `expr`       | `string` | Prometheus PromQL query (for Prometheus datasource) |
+| `query`      | `string` | Query string (for other datasources)                |
+| `datasource` | `object` | Override datasource for this query (optional)       |
 
 **Error Responses**
 
-| Status | Description | Response Body |
-|--------|-------------|---------------|
-| 401 Unauthorized | Invalid or missing API key | `{"message": "Unauthorized"}` |
-| 404 Not Found | Dashboard UID not found | `{"message": "Dashboard not found"}` |
-| 403 Forbidden | Insufficient permissions | `{"message": "Permission denied"}` |
+| Status           | Description                | Response Body                        |
+| ---------------- | -------------------------- | ------------------------------------ |
+| 401 Unauthorized | Invalid or missing API key | `{"message": "Unauthorized"}`        |
+| 404 Not Found    | Dashboard UID not found    | `{"message": "Dashboard not found"}` |
+| 403 Forbidden    | Insufficient permissions   | `{"message": "Permission denied"}`   |
 
 **CLI Mapping**
 

@@ -36,16 +36,16 @@ Accept: application/json
 
 **Response Fields**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `version` | `string` | Grafana version (semver format) |
+| Field      | Type     | Description                             |
+| ---------- | -------- | --------------------------------------- |
+| `version`  | `string` | Grafana version (semver format)         |
 | `database` | `string` | Database status ("ok" or error message) |
-| `commit` | `string` | Git commit hash (short form) |
+| `commit`   | `string` | Git commit hash (short form)            |
 
 **Error Responses**
 
-| Status | Description | Response Body |
-|--------|-------------|---------------|
+| Status                  | Description                | Response Body                                  |
+| ----------------------- | -------------------------- | ---------------------------------------------- |
 | 503 Service Unavailable | Database connection failed | `{"database": "error connecting to database"}` |
 
 **CLI Mapping**

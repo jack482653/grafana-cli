@@ -21,7 +21,10 @@ export function createQueryCommand(): Command {
     .option("--from <time>", "Start time (now-1h, now-24h, ISO 8601, Unix seconds)", "now-1h")
     .option("--to <time>", "End time", "now")
     .option("--var <key=value>", "Template variable substitution (repeatable)", collectVar, [])
-    .option("--datasource <uid>", "Datasource UID override (required when API key lacks datasource list permission)")
+    .option(
+      "--datasource <uid>",
+      "Datasource UID override (required when API key lacks datasource list permission)",
+    )
     .option("--server <name>", "Use specific server configuration")
     .option("--json", "Output as JSON")
     .action(async (options) => {

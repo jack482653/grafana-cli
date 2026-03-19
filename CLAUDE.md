@@ -4,9 +4,9 @@
 
 1. 設定 grafana 伺服器的 URL 和認證資訊(選填)
 2. 支援多組伺服器和認證設定
-2. 執行 grafana rest api 支援的查詢，這部分還未知所以需要再深入探索
-3. 顯示查詢結果
-4. 檢查 grafana 伺服器的狀態
+3. 執行 grafana rest api 支援的查詢，這部分還未知所以需要再深入探索
+4. 顯示查詢結果
+5. 檢查 grafana 伺服器的狀態
 
 需要支援 Grafana v7.5，該版本的 http api 文件如下：
 https://grafana.com/docs/grafana/v7.5/http_api/
@@ -22,9 +22,9 @@ https://grafana.com/docs/grafana/v7.5/http_api/
 請寫到專案根目錄的 @MEMORY.md，以供未來自己或其他 AI agent 進行回想，內容請用
 
 - 條列式，並加 [P0/P1/P2] 優先級標籤
-  * [P0] 核心身份（永不過期）
-  * [P1] 活躍專案（90 天過期）
-  * [P2] 臨時內容（30 天過期）
+  - [P0] 核心身份（永不過期）
+  - [P1] 活躍專案（90 天過期）
+  - [P2] 臨時內容（30 天過期）
 - 盡量簡短，總行數不超過 200 行
 - 用詞請盡量中性，不要用太過於強烈的詞彙
 - 過期內容移到 archive/，之後可以用語意搜尋召回
@@ -70,6 +70,7 @@ gh api -X POST repos/jack482653/grafana-cli/pulls/3/comments \
 ```
 
 **注意：**
+
 - `body` 必須用 `-f` 方式傳遞， `in_reply_to` 必須用 `-F` 方式傳遞
 - `in_reply_to` 是 comment ID (從 review comments API 取得)
 - 這會在 conversation thread 中新增回覆，而非獨立的 comment
@@ -115,8 +116,10 @@ mcp__github__pull_request_read(
 - `IsResolved`: 是否已解決
 
 ## Active Technologies
+
 - Node.js 18+ (LTS), TypeScript 5.x (target: ES2022) (001-cli-mvp)
 - File system (`~/.grafana-cli/config.json` for server configurations) (001-cli-mvp)
 
 ## Recent Changes
+
 - 001-cli-mvp: Added Node.js 18+ (LTS), TypeScript 5.x (target: ES2022)

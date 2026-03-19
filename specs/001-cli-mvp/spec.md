@@ -5,7 +5,7 @@
 **Status**: Draft
 **Input**: User description: "建立 grafana cli 程式，需要可以：1. 設定 grafana 伺服器的 URL 和認證資訊(選填)，並支援多組 config；2. 執行 grafana rest api 支援的查詢，例如：查詢 Dashboard、查詢 Panel、進行 query、查詢 alert 等等；3. 顯示 query 的查詢結果；4. 檢查 grafana 伺服器的狀態"
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Server Configuration and Verification (Priority: P1) 🎯 MVP
 
@@ -88,7 +88,7 @@
 - **Multiple servers**: What happens when the same operation is requested across multiple servers simultaneously?
 - **Concurrent operations**: How does the CLI handle multiple processes trying to modify configuration simultaneously?
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -154,7 +154,7 @@
 - **Alert**: Grafana alert entity (ID, title, state, folder, conditions, notifications)
 - **Query Result**: Time series data returned from query execution (timestamps, values, labels/tags)
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 

@@ -18,15 +18,15 @@ This document defines the core entities and their relationships for the Grafana 
 
 ### Fields
 
-| Field | Type | Required | Description | Validation |
-|-------|------|----------|-------------|------------|
-| `name` | `string` | Yes | Human-readable identifier for this server | Unique, 1-50 chars, alphanumeric + hyphens |
-| `url` | `string` | Yes | Grafana server base URL | Must start with http:// or https://, valid URL format |
-| `apiKey` | `string` | No | Grafana API key for Bearer token auth | Mutually exclusive with username/password |
-| `username` | `string` | No | Username for basic auth | Required if password present |
-| `password` | `string` | No | Password for basic auth | Required if username present |
-| `isDefault` | `boolean` | Yes | Whether this is the active/default server | Only one server can be default |
-| `timeout` | `number` | No | Request timeout in milliseconds | Default: 30000, range: 1000-300000 |
+| Field       | Type      | Required | Description                               | Validation                                            |
+| ----------- | --------- | -------- | ----------------------------------------- | ----------------------------------------------------- |
+| `name`      | `string`  | Yes      | Human-readable identifier for this server | Unique, 1-50 chars, alphanumeric + hyphens            |
+| `url`       | `string`  | Yes      | Grafana server base URL                   | Must start with http:// or https://, valid URL format |
+| `apiKey`    | `string`  | No       | Grafana API key for Bearer token auth     | Mutually exclusive with username/password             |
+| `username`  | `string`  | No       | Username for basic auth                   | Required if password present                          |
+| `password`  | `string`  | No       | Password for basic auth                   | Required if username present                          |
+| `isDefault` | `boolean` | Yes      | Whether this is the active/default server | Only one server can be default                        |
+| `timeout`   | `number`  | No       | Request timeout in milliseconds           | Default: 30000, range: 1000-300000                    |
 
 ### Relationships
 
@@ -68,10 +68,10 @@ export interface ServerConfig {
 
 ### Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `configs` | `Record<string, ServerConfig>` | Yes | Map of server name → ServerConfig |
-| `activeConfig` | `string \| undefined` | Yes | Name of currently active server |
+| Field          | Type                           | Required | Description                       |
+| -------------- | ------------------------------ | -------- | --------------------------------- |
+| `configs`      | `Record<string, ServerConfig>` | Yes      | Map of server name → ServerConfig |
+| `activeConfig` | `string \| undefined`          | Yes      | Name of currently active server   |
 
 ### Relationships
 
@@ -102,14 +102,14 @@ export interface ConfigStore {
 
 ### Fields
 
-| Field | Type | Required | Description | Source |
-|-------|------|----------|-------------|--------|
-| `uid` | `string` | Yes | Unique dashboard identifier | Grafana API response |
-| `title` | `string` | Yes | Dashboard display title | Grafana API response |
-| `tags` | `string[]` | No | Dashboard tags for categorization | Grafana API response |
-| `folderTitle` | `string` | No | Folder name containing dashboard | Grafana API response (search) |
-| `url` | `string` | No | Relative dashboard URL | Grafana API response |
-| `panels` | `Panel[]` | No | Array of panels (only in full dashboard GET) | Grafana API response (get) |
+| Field         | Type       | Required | Description                                  | Source                        |
+| ------------- | ---------- | -------- | -------------------------------------------- | ----------------------------- |
+| `uid`         | `string`   | Yes      | Unique dashboard identifier                  | Grafana API response          |
+| `title`       | `string`   | Yes      | Dashboard display title                      | Grafana API response          |
+| `tags`        | `string[]` | No       | Dashboard tags for categorization            | Grafana API response          |
+| `folderTitle` | `string`   | No       | Folder name containing dashboard             | Grafana API response (search) |
+| `url`         | `string`   | No       | Relative dashboard URL                       | Grafana API response          |
+| `panels`      | `Panel[]`  | No       | Array of panels (only in full dashboard GET) | Grafana API response (get)    |
 
 ### Relationships
 
@@ -148,13 +148,13 @@ export interface Dashboard {
 
 ### Fields
 
-| Field | Type | Required | Description | Source |
-|-------|------|----------|-------------|--------|
-| `id` | `number` | Yes | Panel ID within dashboard | Grafana dashboard JSON |
-| `title` | `string` | No | Panel display title | Grafana dashboard JSON |
-| `type` | `string` | Yes | Panel type (graph, table, stat, etc.) | Grafana dashboard JSON |
-| `datasource` | `Datasource` | No | Datasource configuration | Grafana dashboard JSON |
-| `targets` | `Query[]` | Yes | Array of queries (targets in Grafana) | Grafana dashboard JSON |
+| Field        | Type         | Required | Description                           | Source                 |
+| ------------ | ------------ | -------- | ------------------------------------- | ---------------------- |
+| `id`         | `number`     | Yes      | Panel ID within dashboard             | Grafana dashboard JSON |
+| `title`      | `string`     | No       | Panel display title                   | Grafana dashboard JSON |
+| `type`       | `string`     | Yes      | Panel type (graph, table, stat, etc.) | Grafana dashboard JSON |
+| `datasource` | `Datasource` | No       | Datasource configuration              | Grafana dashboard JSON |
+| `targets`    | `Query[]`    | Yes      | Array of queries (targets in Grafana) | Grafana dashboard JSON |
 
 ### Relationships
 
@@ -194,14 +194,14 @@ export interface Datasource {
 
 ### Fields
 
-| Field | Type | Required | Description | Source |
-|-------|------|----------|-------------|--------|
-| `refId` | `string` | Yes | Query reference ID (A, B, C, ...) | Grafana dashboard JSON |
-| `datasource` | `Datasource` | No | Datasource for this query (can override panel datasource) | Grafana dashboard JSON |
-| `expr` | `string` | No | Query expression (Prometheus PromQL, etc.) | Grafana dashboard JSON |
-| `query` | `string` | No | Alternative query field (used by some datasources) | Grafana dashboard JSON |
-| `queryType` | `string` | No | Query type (e.g., "timeSeriesQuery" for Azure) | Grafana dashboard JSON |
-| `rawQuery` | `any` | No | Datasource-specific query object | Grafana dashboard JSON |
+| Field        | Type         | Required | Description                                               | Source                 |
+| ------------ | ------------ | -------- | --------------------------------------------------------- | ---------------------- |
+| `refId`      | `string`     | Yes      | Query reference ID (A, B, C, ...)                         | Grafana dashboard JSON |
+| `datasource` | `Datasource` | No       | Datasource for this query (can override panel datasource) | Grafana dashboard JSON |
+| `expr`       | `string`     | No       | Query expression (Prometheus PromQL, etc.)                | Grafana dashboard JSON |
+| `query`      | `string`     | No       | Alternative query field (used by some datasources)        | Grafana dashboard JSON |
+| `queryType`  | `string`     | No       | Query type (e.g., "timeSeriesQuery" for Azure)            | Grafana dashboard JSON |
+| `rawQuery`   | `any`        | No       | Datasource-specific query object                          | Grafana dashboard JSON |
 
 ### Relationships
 
@@ -216,6 +216,7 @@ export interface Datasource {
 ### Notes
 
 Query structure varies by datasource type:
+
 - **Prometheus**: `expr` contains PromQL
 - **Azure Monitor**: `rawQuery` contains azureMonitor object
 - **GCP**: `rawQuery` contains GCP-specific query structure
@@ -243,10 +244,10 @@ export interface Query {
 
 ### Fields
 
-| Field | Type | Required | Description | Source |
-|-------|------|----------|-------------|--------|
-| `refId` | `string` | Yes | Query reference ID (matches Query.refId) | Grafana query API response |
-| `series` | `TimeSeries[]` | Yes | Array of time series | Grafana query API response |
+| Field    | Type           | Required | Description                              | Source                     |
+| -------- | -------------- | -------- | ---------------------------------------- | -------------------------- |
+| `refId`  | `string`       | Yes      | Query reference ID (matches Query.refId) | Grafana query API response |
+| `series` | `TimeSeries[]` | Yes      | Array of time series                     | Grafana query API response |
 
 ### Relationships
 
@@ -282,15 +283,15 @@ export interface Datapoint {
 
 ### Fields
 
-| Field | Type | Required | Description | Source |
-|-------|------|----------|-------------|--------|
-| `id` | `number` | Yes | Alert ID | Grafana API response |
-| `dashboardId` | `number` | No | Dashboard ID containing alert | Grafana API response |
-| `panelId` | `number` | No | Panel ID containing alert | Grafana API response |
-| `name` | `string` | Yes | Alert name | Grafana API response |
-| `state` | `AlertState` | Yes | Current alert state | Grafana API response |
-| `folderTitle` | `string` | No | Folder containing alert | Grafana API response |
-| `message` | `string` | No | Alert message/description | Grafana API response |
+| Field         | Type         | Required | Description                   | Source               |
+| ------------- | ------------ | -------- | ----------------------------- | -------------------- |
+| `id`          | `number`     | Yes      | Alert ID                      | Grafana API response |
+| `dashboardId` | `number`     | No       | Dashboard ID containing alert | Grafana API response |
+| `panelId`     | `number`     | No       | Panel ID containing alert     | Grafana API response |
+| `name`        | `string`     | Yes      | Alert name                    | Grafana API response |
+| `state`       | `AlertState` | Yes      | Current alert state           | Grafana API response |
+| `folderTitle` | `string`     | No       | Folder containing alert       | Grafana API response |
+| `message`     | `string`     | No       | Alert message/description     | Grafana API response |
 
 ### Relationships
 
@@ -347,11 +348,11 @@ export enum AlertState {
 
 ### Fields
 
-| Field | Type | Required | Description | Source |
-|-------|------|----------|-------------|--------|
-| `version` | `string` | Yes | Grafana version (e.g., "7.5.0") | /api/health response |
-| `database` | `string` | Yes | Database status ("ok" or error) | /api/health response |
-| `commit` | `string` | No | Git commit hash | /api/health response |
+| Field      | Type     | Required | Description                     | Source               |
+| ---------- | -------- | -------- | ------------------------------- | -------------------- |
+| `version`  | `string` | Yes      | Grafana version (e.g., "7.5.0") | /api/health response |
+| `database` | `string` | Yes      | Database status ("ok" or error) | /api/health response |
+| `commit`   | `string` | No       | Git commit hash                 | /api/health response |
 
 ### Relationships
 
@@ -435,13 +436,13 @@ ServerConfig
 
 ## Validation Summary
 
-| Entity | Validation Location | Validation Rules |
-|--------|-------------------|------------------|
+| Entity       | Validation Location            | Validation Rules                               |
+| ------------ | ------------------------------ | ---------------------------------------------- |
 | ServerConfig | `src/services/config-store.ts` | URL format, auth completeness, name uniqueness |
-| ConfigStore | `src/services/config-store.ts` | Active config exists, default consistency |
-| Dashboard | Grafana API | UID non-empty |
-| Panel | Grafana API | ID positive, targets non-empty |
-| Query | Grafana API | RefId non-empty, query expression present |
-| Alert | Grafana API | ID positive, state valid enum |
+| ConfigStore  | `src/services/config-store.ts` | Active config exists, default consistency      |
+| Dashboard    | Grafana API                    | UID non-empty                                  |
+| Panel        | Grafana API                    | ID positive, targets non-empty                 |
+| Query        | Grafana API                    | RefId non-empty, query expression present      |
+| Alert        | Grafana API                    | ID positive, state valid enum                  |
 
 Most validation handled by Grafana API (trusted data source). CLI validates only user input (config, URLs, time ranges).

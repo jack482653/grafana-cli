@@ -30,7 +30,7 @@
 - [x] T004 [P] Create .nvmrc with Node.js version 18
 - [x] T005 [P] Create tsconfig.json (target: ES2022, module: Node16, moduleResolution: node16, strict: true, esModuleInterop: true, outDir: dist, rootDir: src)
 - [x] T006 [P] Create .prettierrc (copy from prom-cli: semi: true, singleQuote: false, tabWidth: 2, trailingComma: all, printWidth: 100, plugins: @trivago/prettier-plugin-sort-imports, importOrder: ["^node:", "<THIRD_PARTY_MODULES>", "^[./]"])
-- [x] T007 [P] Create vitest.config.ts (test file pattern: *.test.ts, coverage provider: v8)
+- [x] T007 [P] Create vitest.config.ts (test file pattern: \*.test.ts, coverage provider: v8)
 - [x] T008 [P] Add scripts to package.json (dev: tsx src/index.ts, build: tsc, start: node dist/index.js, test: vitest, test:run: vitest run, test:coverage: vitest run --coverage, format: prettier --write ., format:check: prettier --check .)
 - [x] T009 Create src/ directory structure (commands/, services/, formatters/, types/)
 - [x] T010 Create tests/ directory structure (contract/, integration/, unit/)
@@ -177,12 +177,12 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T060 [P] Add README.md with installation instructions (npm install -g grafana-cli or pnpm install -g grafana-cli), quick start guide (config set, status, dashboard list), command reference
-- [ ] T061 [P] Add error message improvements across all commands in src/services/grafana-client.ts (ensure all errors include actionable next steps, e.g., "Run 'grafana-cli config list' to verify settings")
-- [ ] T062 [P] Add comprehensive JSDoc comments to all service functions in src/services/ (document parameters, return types, throws, examples)
-- [ ] T063 Run format check in CI (pnpm format:check) and verify all code passes prettier rules
-- [ ] T064 Run test coverage report (pnpm test:coverage) and verify contract + integration tests cover all API endpoints and user flows
-- [ ] T065 Validate quickstart.md instructions by following setup steps on clean machine and verifying all commands work
+- [x] T060 [P] Add README.md with installation instructions (npm install -g grafana-cli or pnpm install -g grafana-cli), quick start guide (config set, status, dashboard list), command reference
+- [x] T061 [P] Add error message improvements across all commands in src/services/grafana-client.ts (ensure all errors include actionable next steps, e.g., "Run 'grafana-cli config list' to verify settings")
+- [x] T062 [P] Add comprehensive JSDoc comments to all service functions in src/services/ (document parameters, return types, throws, examples)
+- [x] T063 Run format check in CI (pnpm format:check) and verify all code passes prettier rules
+- [x] T064 Run test coverage report (pnpm test:coverage) and verify contract + integration tests cover all API endpoints and user flows
+- [x] T065 Validate quickstart.md instructions by following setup steps on clean machine and verifying all commands work
 
 ---
 
@@ -303,6 +303,7 @@ With multiple developers:
 **Test Tasks**: 15 contract tests + 4 integration tests = 19 test tasks (29% of total)
 
 **Parallel Opportunities**:
+
 - Setup phase: 7 parallelizable tasks out of 10
 - Foundational phase: 3 parallelizable tasks out of 6
 - User Story 1: 2 parallelizable test tasks + 2 parallelizable implementation tasks

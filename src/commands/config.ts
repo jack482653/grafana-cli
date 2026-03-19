@@ -82,11 +82,7 @@ export function createConfigCommand(): Command {
         const displayConfigs = configs.map((config) => ({
           name: config.name,
           url: config.url,
-          auth: config.apiKey
-            ? "API Key"
-            : config.username
-              ? "Basic Auth"
-              : "None",
+          auth: config.apiKey ? "API Key" : config.username ? "Basic Auth" : "None",
           default: config.isDefault ? "✓" : "",
         }));
 
