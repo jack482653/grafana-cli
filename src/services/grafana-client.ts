@@ -2,6 +2,31 @@ import axios, { type AxiosError, type AxiosInstance } from "axios";
 
 import type { Dashboard, QueryResult, ServerConfig, ServerStatus, TimeSeries } from "../types/index.js";
 
+interface GrafanaDatasourceInfo {
+  id: number;
+  type: string;
+  isDefault?: boolean;
+}
+
+interface GrafanaFrontendSettings {
+  datasources: Record<string, GrafanaDatasourceInfo>;
+}
+
+interface TsdbSeries {
+  name: string;
+  points: [number | null, number][]; // [value, timestamp_ms]
+}
+
+interface TsdbQueryResult {
+  refId?: string;
+  series?: TsdbSeries[];
+  error?: string;
+}
+
+interface TsdbQueryResponse {
+  results: Record<string, TsdbQueryResult>;
+}
+
 /**
  * Create axios HTTP client for Grafana API
  */
@@ -180,8 +205,8 @@ async function fetchDatasourceMap(
   client: AxiosInstance,
 ): Promise<{ byName: Record<string, number>; defaultId?: number }> {
   try {
-    const resp = await client.get<any>("/api/frontend/settings");
-    const datasources: Record<string, any> = resp.data.datasources || {};
+    const resp = await client.get<GrafanaFrontendSettings>("/api/frontend/settings");
+    const datasources = resp.data.datasources || {};
     const byName: Record<string, number> = {};
     let defaultId: number | undefined;
 
@@ -250,8 +275,8 @@ export async function executeQuery(
     // Auto-resolve: use frontend/settings to find the datasource
     const { byName, defaultId } = await fetchDatasourceMap(client);
 
-    if (panel.datasource && typeof panel.datasource === "object" && (panel.datasource as any).id) {
-      datasourceId = (panel.datasource as any).id;
+    if (panel.datasource && typeof panel.datasource === "object" && panel.datasource.id) {
+      datasourceId = panel.datasource.id;
     } else if (typeof panel.datasource === "string" && panel.datasource) {
       datasourceId = byName[panel.datasource];
     } else {
@@ -279,9 +304,9 @@ export async function executeQuery(
     maxDataPoints: 1000,
   }));
 
-  let rawResults: Record<string, any>;
+  let rawResults: Record<string, TsdbQueryResult>;
   try {
-    const response = await client.post<{ results: Record<string, any> }>(
+    const response = await client.post<TsdbQueryResponse>(
       "/api/tsdb/query",
       {
         queries,
@@ -309,7 +334,7 @@ export async function executeQuery(
       return { refId, series: [] };
     }
 
-    const series: TimeSeries[] = (result.series || []).map((s: any) => {
+    const series: TimeSeries[] = (result.series || []).map((s: TsdbSeries) => {
       // Parse labels from series name: metric{k="v",...} → { k: v }
       const labelMatch = s.name?.match(/\{(.+)\}$/);
       const labels: Record<string, string> = {};

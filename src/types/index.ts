@@ -33,8 +33,9 @@ export interface Panel {
 }
 
 export interface Datasource {
-  type: string;
-  uid: string;
+  type?: string;
+  uid?: string;
+  id?: number;
 }
 
 // Query types
