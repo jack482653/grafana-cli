@@ -395,7 +395,10 @@ async function resolveFolderId(
     const resp = await client.get<{ id: number; title: string }[]>("/api/folders");
     const folder = resp.data.find((f) => f.title.toLowerCase() === folderName.toLowerCase());
     return folder?.id;
-  } catch {
+  } catch (err) {
+    console.error(
+      `Warning: Failed to fetch folders: ${err instanceof Error ? err.message : String(err)}`,
+    );
     return undefined;
   }
 }

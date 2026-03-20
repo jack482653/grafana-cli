@@ -91,8 +91,8 @@ export function createAlertCommand(): Command {
       if (detail.conditions.length > 0) {
         console.log(`\nConditions (${detail.conditions.length}):`);
         for (const cond of detail.conditions) {
-          const params = cond.query.params.join(", ");
-          const evalStr = `${cond.evaluator.type}(${cond.evaluator.params.join(", ")})`;
+          const params = cond.query.params?.join(", ") ?? "";
+          const evalStr = `${cond.evaluator.type}(${cond.evaluator.params?.join(", ") ?? ""})`;
           console.log(`  [${cond.reducer.type}] ${evalStr}  query(${params})`);
         }
       }
