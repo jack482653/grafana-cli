@@ -5,7 +5,7 @@
 **Status**: Draft
 **Input**: User description: "建立 grafana cli 程式，需要可以：1. 設定 grafana 伺服器的 URL 和認證資訊(選填)，並支援多組 config；2. 執行 grafana rest api 支援的查詢，例如：查詢 Dashboard、查詢 Panel、進行 query、查詢 alert 等等；3. 顯示 query 的查詢結果；4. 檢查 grafana 伺服器的狀態"
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Server Configuration and Verification (Priority: P1) 🎯 MVP
 
@@ -54,7 +54,7 @@
 **Acceptance Scenarios**:
 
 1. **Given** a dashboard UID and panel ID, **When** I run `grafana-cli query execute --dashboard <uid> --panel <id> --from "now-1h" --to "now"`, **Then** the panel's query is executed and results are displayed
-2. **Given** query results, **When** I run `grafana-cli query execute --dashboard <uid> --panel <id> --output json`, **Then** results are formatted as JSON for programmatic consumption
+2. **Given** query results, **When** I run `grafana-cli query execute --dashboard <uid> --panel <id> --json`, **Then** results are formatted as JSON for programmatic consumption
 3. **Given** a panel with multiple queries, **When** I run `grafana-cli query execute --dashboard <uid> --panel <id>`, **Then** all queries for that panel are executed and results are labeled by query ref ID
 4. **Given** a panel with template variables, **When** I run `grafana-cli query execute --dashboard <uid> --panel <id> --var "server=web01"`, **Then** the query is executed with the specified variable value
 5. **Given** a long-running query, **When** execution exceeds expected time, **Then** progress is shown on stderr and user can cancel with Ctrl+C
@@ -88,7 +88,7 @@
 - **Multiple servers**: What happens when the same operation is requested across multiple servers simultaneously?
 - **Concurrent operations**: How does the CLI handle multiple processes trying to modify configuration simultaneously?
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -139,7 +139,7 @@
 #### Output Formatting (All Priorities)
 
 - **FR-030**: System MUST support human-readable output format by default (tables, formatted text)
-- **FR-031**: System MUST support JSON output format via `--json` or `--output json` flag
+- **FR-031**: System MUST support JSON output format via `--json` flag
 - **FR-032**: System MUST write data output to stdout
 - **FR-033**: System MUST write error messages to stderr
 - **FR-034**: System MUST exit with code 0 on success, 1 on general error, 2 on authentication error, 3 on network error
@@ -154,7 +154,7 @@
 - **Alert**: Grafana alert entity (ID, title, state, folder, conditions, notifications)
 - **Query Result**: Time series data returned from query execution (timestamps, values, labels/tags)
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 

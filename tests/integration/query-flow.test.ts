@@ -67,9 +67,7 @@ describe.skipIf(!GRAFANA_TEST_URL)("Query Flow Integration (requires Grafana)", 
     for (const d of dashboards.slice(0, 5)) {
       const getOutput = cli(["dashboard", "get", d.uid, "--json"], configPath);
       const dashboard = JSON.parse(getOutput);
-      const panel = (dashboard.panels || []).find(
-        (p: any) => p.targets && p.targets.length > 0,
-      );
+      const panel = (dashboard.panels || []).find((p: any) => p.targets && p.targets.length > 0);
       if (panel) {
         dashUid = d.uid;
         panelId = panel.id;
@@ -84,11 +82,16 @@ describe.skipIf(!GRAFANA_TEST_URL)("Query Flow Integration (requires Grafana)", 
 
     const output = cli(
       [
-        "query", "execute",
-        "--dashboard", dashUid,
-        "--panel", String(panelId),
-        "--from", "now-1h",
-        "--to", "now",
+        "query",
+        "execute",
+        "--dashboard",
+        dashUid,
+        "--panel",
+        String(panelId),
+        "--from",
+        "now-1h",
+        "--to",
+        "now",
       ],
       configPath,
     );
@@ -109,9 +112,7 @@ describe.skipIf(!GRAFANA_TEST_URL)("Query Flow Integration (requires Grafana)", 
     for (const d of dashboards.slice(0, 5)) {
       const getOutput = cli(["dashboard", "get", d.uid, "--json"], configPath);
       const dashboard = JSON.parse(getOutput);
-      const panel = (dashboard.panels || []).find(
-        (p: any) => p.targets && p.targets.length > 0,
-      );
+      const panel = (dashboard.panels || []).find((p: any) => p.targets && p.targets.length > 0);
       if (panel) {
         dashUid = d.uid;
         panelId = panel.id;
@@ -123,11 +124,16 @@ describe.skipIf(!GRAFANA_TEST_URL)("Query Flow Integration (requires Grafana)", 
 
     const output = cli(
       [
-        "query", "execute",
-        "--dashboard", dashUid,
-        "--panel", String(panelId),
-        "--from", "now-1h",
-        "--to", "now",
+        "query",
+        "execute",
+        "--dashboard",
+        dashUid,
+        "--panel",
+        String(panelId),
+        "--from",
+        "now-1h",
+        "--to",
+        "now",
         "--json",
       ],
       configPath,
@@ -148,11 +154,16 @@ describe.skipIf(!GRAFANA_TEST_URL)("Query Flow Integration (requires Grafana)", 
 
     const { stderr, exitCode } = cliWithError(
       [
-        "query", "execute",
-        "--dashboard", dashboards[0].uid,
-        "--panel", "99999",
-        "--from", "now-1h",
-        "--to", "now",
+        "query",
+        "execute",
+        "--dashboard",
+        dashboards[0].uid,
+        "--panel",
+        "99999",
+        "--from",
+        "now-1h",
+        "--to",
+        "now",
       ],
       configPath,
     );
@@ -192,12 +203,7 @@ describe.skipIf(!!GRAFANA_TEST_URL)("Query Flow Integration (no server)", () => 
     });
 
     const { stderr, exitCode } = cliWithError(
-      [
-        "query", "execute",
-        "--dashboard", "abc",
-        "--panel", "1",
-        "--from", "not-a-valid-time",
-      ],
+      ["query", "execute", "--dashboard", "abc", "--panel", "1", "--from", "not-a-valid-time"],
       configPath,
     );
     expect(exitCode).not.toBe(0);

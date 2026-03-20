@@ -111,10 +111,7 @@ describe.skipIf(!GRAFANA_TEST_URL)("Dashboard Flow Integration (requires Grafana
   });
 
   it("dashboard get <invalid-uid> exits with error", () => {
-    const { stderr } = cliWithError(
-      ["dashboard", "get", "non-existent-uid-xyz"],
-      configPath,
-    );
+    const { stderr } = cliWithError(["dashboard", "get", "non-existent-uid-xyz"], configPath);
     expect(stderr).toContain("not found");
   });
 });

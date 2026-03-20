@@ -7,6 +7,7 @@
 ## Overview
 
 This document captures all technical decisions made during Phase 0 research to resolve NEEDS CLARIFICATION items from the implementation plan. Decisions are informed by:
+
 - Reference project: prom-cli ($HOME/Code/prom-cli)
 - Project constitution (MVP-First, Clean Architecture, Practical Testing)
 - Grafana HTTP API v7.5 capabilities
@@ -19,6 +20,7 @@ This document captures all technical decisions made during Phase 0 research to r
 **Chosen**: `vitest` version 4.x
 
 **Rationale**:
+
 - **Native ESM support**: Works seamlessly with `"type": "module"` in package.json (no configuration hacks required)
 - **Fast execution**: Vite-powered, significantly faster than Jest for small to medium projects
 - **Modern API**: Compatible with Jest API but optimized for modern JavaScript/TypeScript
@@ -27,16 +29,19 @@ This document captures all technical decisions made during Phase 0 research to r
 - **Watch mode**: Excellent DX with instant test re-runs during development
 
 **Alternatives considered**:
+
 - `jest`: Popular but requires ESM configuration workarounds, slower in ESM mode
 - `node:test`: Built-in but less mature tooling, limited assertion library, no coverage built-in
 
 **Implementation details**:
+
 - Package: `vitest@^4.0.16`, `@vitest/coverage-v8@^4.0.16` (dev dependencies)
 - Config file: `vitest.config.ts` at project root
 - Test file pattern: `*.test.ts` in `tests/` directory
 - Coverage: HTML + text reports, thresholds TBD based on MVP scope
 
 **References**:
+
 - prom-cli package.json: vitest 4.0.16
 - Vitest docs: https://vitest.dev/
 
@@ -47,6 +52,7 @@ This document captures all technical decisions made during Phase 0 research to r
 **Chosen**: Manual table formatting implementation (no external library)
 
 **Rationale**:
+
 - **Simplicity**: Custom table formatting ~50 lines of code vs. library dependency
 - **Bundle size**: Zero additional dependencies for table output
 - **MVP alignment**: Matches constitution Principle I (YAGNI, simple first)
@@ -55,11 +61,13 @@ This document captures all technical decisions made during Phase 0 research to r
 - **No over-engineering**: MVP needs basic aligned columns, not ASCII art borders or complex layouts
 
 **Alternatives considered**:
+
 - `cli-table3`: Feature-rich (Unicode borders, word wrap) but 200KB+ minified, overkill for MVP
 - `table`: Lightweight (~20KB) but limited customization for Grafana nested data
 - `console.table()`: Built-in but poor control over column widths and header formatting
 
 **Implementation details**:
+
 - Location: `src/formatters/table.ts`
 - Functions:
   - `formatTable(columns, data)`: Main table rendering
@@ -68,6 +76,7 @@ This document captures all technical decisions made during Phase 0 research to r
 - Pattern: Same as prom-cli with column headers, data rows, automatic width calculation
 
 **References**:
+
 - prom-cli formatter: $HOME/Code/prom-cli/src/formatters/table.ts
 
 ---
@@ -77,6 +86,7 @@ This document captures all technical decisions made during Phase 0 research to r
 **Chosen**: Direct Node.js `fs` module with atomic write pattern (no config library)
 
 **Rationale**:
+
 - **Security control**: Direct file permissions control (chmod 0600) for credentials
 - **Simplicity**: Config is JSON-only, no need for multi-format support
 - **Atomic writes**: Temp file + rename pattern prevents corruption during writes
@@ -85,11 +95,13 @@ This document captures all technical decisions made during Phase 0 research to r
 - **MVP alignment**: No speculative features (YAML/TOML support, schema validation libraries)
 
 **Alternatives considered**:
+
 - `conf`: Electron-style config (190KB, overkill for CLI), schema validation not needed for MVP
 - `cosmiconfig`: Multi-format support unnecessary (we only need JSON), adds complexity
 - **Winner**: Native `fs` + JSON.parse/stringify is sufficient for MVP
 
 **Implementation details**:
+
 - Location: `src/services/config-store.ts`
 - Config path: `~/.grafana-cli/config.json` (override via `GRAFANA_CLI_CONFIG_PATH` env var)
 - Functions:
@@ -113,6 +125,7 @@ This document captures all technical decisions made during Phase 0 research to r
 - Permissions: Set 0600 after save (owner read/write only)
 
 **References**:
+
 - prom-cli config-store: $HOME/Code/prom-cli/src/services/config-store.ts
 - Node.js fs docs: https://nodejs.org/api/fs.html
 
@@ -123,6 +136,7 @@ This document captures all technical decisions made during Phase 0 research to r
 **Chosen**: `axios` with instance-per-config pattern, API key via `Authorization: Bearer <token>` header
 
 **Rationale**:
+
 - **Grafana API auth**: v7.5 supports API keys via `Authorization: Bearer <api-key>` header
 - **Basic auth support**: Username/password encoded as `Authorization: Basic <base64(user:pass)>`
 - **Reference project**: prom-cli uses axios with similar auth header pattern
@@ -131,11 +145,13 @@ This document captures all technical decisions made during Phase 0 research to r
 - **Timeout**: Default 30 seconds (configurable per server), matches prom-cli
 
 **Alternatives considered**:
+
 - `node-fetch`: Lower-level, requires manual header management and timeout implementation
 - `got`: Similar to axios but less familiar ecosystem
 - **Winner**: axios proven in prom-cli, excellent TypeScript support, rich error handling
 
 **Implementation details**:
+
 - Location: `src/services/grafana-client.ts`
 - Functions:
   - `createClient(config)`: Build axios instance with baseURL and auth headers
@@ -151,12 +167,14 @@ This document captures all technical decisions made during Phase 0 research to r
   - 4xx/5xx API errors → Exit code 1 (general error)
 
 **Grafana HTTP API v7.5 Specifics**:
+
 - API key creation: Grafana UI → Configuration → API Keys → Add key
 - Required permissions: Viewer role sufficient for all read operations (dashboards, queries, alerts)
 - API key header: Must use `Bearer` scheme (not `X-API-Key` custom header)
 - Base path: Most endpoints under `/api/` (e.g., `/api/health`, `/api/dashboards/uid/:uid`)
 
 **References**:
+
 - prom-cli HTTP client: $HOME/Code/prom-cli/src/services/prometheus.ts
 - Grafana v7.5 API auth: https://grafana.com/docs/grafana/v7.5/http_api/auth/
 - Axios docs: https://axios-http.com/docs/intro
@@ -168,6 +186,7 @@ This document captures all technical decisions made during Phase 0 research to r
 **Chosen**: Simplified Clean Architecture with `services/` layer (not full domain/usecases/adapters)
 
 **Rationale**:
+
 - **MVP alignment**: Full Clean Architecture layers (domain entities, use cases, adapters, frameworks) is over-engineering for MVP
 - **Reference project**: prom-cli uses simplified structure (commands, services, formatters, types) successfully
 - **Gradual complexity**: Start simple, refactor to full Clean Architecture if complexity grows
@@ -182,6 +201,7 @@ Constitution Principle III mandates Dependency Inversion (interfaces like `IConf
 **Resolution**: Principle I takes precedence during MVP phase. DIP abstraction is deferred.
 
 **Migration trigger**: Introduce `IGrafanaClient` / `IConfigStore` interfaces when ANY of the following occurs:
+
 1. A second implementation of either interface is needed (e.g., mock client for unit tests, or multiple config backends)
 2. Unit tests require mocking `grafana-client.ts` or `config-store.ts` in isolation
 3. US3 (Query Execution) is implemented and complexity of `grafana-client.ts` exceeds ~200 lines
@@ -190,17 +210,18 @@ This exception is scoped to MVP (US1-US2). Re-evaluate before shipping US3.
 
 **Structure comparison**:
 
-| Full Clean Architecture (Planned) | Simplified (Chosen for MVP) |
-|-----------------------------------|----------------------------|
-| `src/domain/entities/`           | `src/types/` (TypeScript interfaces) |
-| `src/domain/interfaces/`         | Implied by service function signatures |
-| `src/usecases/`                  | `src/services/` (combined use cases + adapters) |
-| `src/adapters/grafana/`          | `src/services/grafana-client.ts` |
-| `src/adapters/storage/`          | `src/services/config-store.ts` |
-| `src/cli/commands/`              | `src/commands/` |
-| `src/cli/formatters/`            | `src/formatters/` |
+| Full Clean Architecture (Planned) | Simplified (Chosen for MVP)                     |
+| --------------------------------- | ----------------------------------------------- |
+| `src/domain/entities/`            | `src/types/` (TypeScript interfaces)            |
+| `src/domain/interfaces/`          | Implied by service function signatures          |
+| `src/usecases/`                   | `src/services/` (combined use cases + adapters) |
+| `src/adapters/grafana/`           | `src/services/grafana-client.ts`                |
+| `src/adapters/storage/`           | `src/services/config-store.ts`                  |
+| `src/cli/commands/`               | `src/commands/`                                 |
+| `src/cli/formatters/`             | `src/formatters/`                               |
 
 **Final structure**:
+
 ```text
 src/
 ├── commands/          # CLI command handlers (thin orchestration)
@@ -223,11 +244,13 @@ src/
 
 **Migration path**:
 If complexity grows (e.g., multiple datasource types, complex query transformations), refactor to full Clean Architecture:
+
 - Extract domain entities (Dashboard, Panel, Query, Alert)
 - Create use case layer (GetDashboard, ExecuteQuery)
 - Abstract external dependencies behind interfaces (IGrafanaClient, IConfigStore)
 
 **References**:
+
 - prom-cli structure: $HOME/Code/prom-cli/src/
 - Constitution Principle I: MVP-First, YAGNI
 
@@ -238,6 +261,7 @@ If complexity grows (e.g., multiple datasource types, complex query transformati
 **Chosen**: Strict mode, ES2022 target, ESM module, Node.js 18+ types
 
 **Rationale**:
+
 - **Type safety**: Strict mode catches errors early, aligns with constitution code quality principle
 - **Modern syntax**: ES2022 target enables top-level await, ?? nullish coalescing, optional chaining
 - **ESM native**: `"module": "Node16"` and `"moduleResolution": "node16"` for native ESM support — TypeScript requires these to match; `ESNext` with `node16` resolution raises a compilation error
@@ -245,6 +269,7 @@ If complexity grows (e.g., multiple datasource types, complex query transformati
 - **Reference project**: prom-cli uses similar config (TypeScript 5.9.3, strict mode)
 
 **tsconfig.json**:
+
 ```json
 {
   "compilerOptions": {
@@ -269,12 +294,14 @@ If complexity grows (e.g., multiple datasource types, complex query transformati
 ```
 
 **Key settings**:
+
 - `"type": "module"` in package.json (ESM not CommonJS)
 - Import extensions: `.js` required in imports (e.g., `./config.js` not `./config`)
 - Build: `tsc` compiles to `dist/`, preserves ESM structure
 - Dev: `tsx src/index.ts` for hot reload during development
 
 **References**:
+
 - prom-cli tsconfig: $HOME/Code/prom-cli/tsconfig.json
 - TypeScript ESM guide: https://www.typescriptlang.org/docs/handbook/esm-node.html
 
@@ -285,6 +312,7 @@ If complexity grows (e.g., multiple datasource types, complex query transformati
 **Chosen**: `pnpm` version 10.15.1+ with workspace support
 
 **Rationale**:
+
 - **User requirement**: Specified in plan input ("使用 pnpm 進行套件管理和 node 版本管理")
 - **Reference project**: prom-cli uses pnpm@10.15.1 successfully
 - **Workspace support**: If project grows to multiple packages (e.g., grafana-client library), pnpm workspaces ready
@@ -293,6 +321,7 @@ If complexity grows (e.g., multiple datasource types, complex query transformati
 - **Fast installs**: Symlink-based approach faster than npm
 
 **Configuration**:
+
 - `"packageManager": "pnpm@10.15.1"` in package.json (Corepack enforcement)
 - `.nvmrc`: `18` or `18.20.0` (LTS version)
 - Scripts:
@@ -304,6 +333,7 @@ If complexity grows (e.g., multiple datasource types, complex query transformati
   - `pnpm format:check`: Check formatting (CI)
 
 **References**:
+
 - prom-cli package.json: `"packageManager": "pnpm@10.15.1"`
 - pnpm docs: https://pnpm.io/
 
@@ -314,6 +344,7 @@ If complexity grows (e.g., multiple datasource types, complex query transformati
 **Chosen**: Prettier with `@trivago/prettier-plugin-sort-imports`
 
 **Rationale**:
+
 - **User requirement**: Specified in plan input (prettier + import sorting plugin)
 - **Reference config**: Use prom-cli's `.prettierrc` configuration
 - **Consistency**: Automated formatting eliminates style debates
@@ -321,6 +352,7 @@ If complexity grows (e.g., multiple datasource types, complex query transformati
 - **Constitution alignment**: Pre-commit quality gate requires formatting pass
 
 **.prettierrc** (from prom-cli):
+
 ```json
 {
   "semi": true,
@@ -336,16 +368,19 @@ If complexity grows (e.g., multiple datasource types, complex query transformati
 ```
 
 **Import order groups**:
+
 1. Node.js built-ins (e.g., `import fs from "node:fs"`)
 2. Third-party modules (e.g., `import axios from "axios"`)
 3. Local imports (e.g., `import { config } from "./config.js"`)
 
 **Integration**:
+
 - Dev dependency: `prettier@^3.7.4`, `@trivago/prettier-plugin-sort-imports@^6.0.0`
 - Pre-commit: Run `prettier --check .` (CI)
 - Auto-fix: `prettier --write .` or IDE integration
 
 **References**:
+
 - prom-cli .prettierrc: $HOME/Code/prom-cli/.prettierrc
 - Trivago plugin: https://github.com/trivago/prettier-plugin-sort-imports
 
@@ -353,16 +388,16 @@ If complexity grows (e.g., multiple datasource types, complex query transformati
 
 ## Summary of Resolved NEEDS CLARIFICATION
 
-| Item | Decision | Source |
-|------|----------|--------|
-| Test framework | vitest 4.x | prom-cli reference, ESM native support |
-| CLI output formatting | Manual table implementation | prom-cli pattern, MVP simplicity |
-| Config file management | Native fs + atomic writes | prom-cli pattern, security control |
-| HTTP client auth | axios with Bearer token | Grafana API v7.5 docs, prom-cli pattern |
-| Project structure | Simplified services layer | prom-cli reference, MVP alignment |
-| TypeScript config | Strict mode, ES2022, ESM | prom-cli reference, Node.js 18+ |
-| Package manager | pnpm 10.15.1+ | User requirement, prom-cli reference |
-| Code formatting | prettier + import sort plugin | User requirement, prom-cli reference |
+| Item                   | Decision                      | Source                                  |
+| ---------------------- | ----------------------------- | --------------------------------------- |
+| Test framework         | vitest 4.x                    | prom-cli reference, ESM native support  |
+| CLI output formatting  | Manual table implementation   | prom-cli pattern, MVP simplicity        |
+| Config file management | Native fs + atomic writes     | prom-cli pattern, security control      |
+| HTTP client auth       | axios with Bearer token       | Grafana API v7.5 docs, prom-cli pattern |
+| Project structure      | Simplified services layer     | prom-cli reference, MVP alignment       |
+| TypeScript config      | Strict mode, ES2022, ESM      | prom-cli reference, Node.js 18+         |
+| Package manager        | pnpm 10.15.1+                 | User requirement, prom-cli reference    |
+| Code formatting        | prettier + import sort plugin | User requirement, prom-cli reference    |
 
 All technical decisions resolved. Proceed to Phase 1 (Design & Contracts).
 
@@ -371,6 +406,7 @@ All technical decisions resolved. Proceed to Phase 1 (Design & Contracts).
 ## Next Phase Prerequisites
 
 Phase 1 (Design & Contracts) can now proceed with:
+
 - ✅ Test framework chosen (vitest)
 - ✅ Output formatting approach (manual tables)
 - ✅ Config storage pattern (fs + atomic writes)

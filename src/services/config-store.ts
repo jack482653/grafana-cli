@@ -5,7 +5,9 @@ import path from "node:path";
 import type { ConfigStore, ServerConfig } from "../types/index.js";
 
 function getConfigPath(): string {
-  return process.env["GRAFANA_CLI_CONFIG_PATH"] || path.join(os.homedir(), ".grafana-cli", "config.json");
+  return (
+    process.env["GRAFANA_CLI_CONFIG_PATH"] || path.join(os.homedir(), ".grafana-cli", "config.json")
+  );
 }
 
 function getConfigDir(): string {

@@ -18,14 +18,14 @@ Alert endpoints support listing and retrieving alert definitions and their curre
 
 **Query Parameters**
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `state` | `string` | No | Filter by alert state: "all", "no_data", "paused", "alerting", "ok", "pending", "execution_error" |
-| `query` | `string` | No | Search query (matches alert name, partial match) |
-| `dashboardId` | `number` | No | Filter by dashboard ID |
-| `panelId` | `number` | No | Filter by panel ID |
-| `folderId` | `number` | No | Filter by folder ID |
-| `limit` | `number` | No | Max results to return (default: 1000) |
+| Parameter     | Type     | Required | Description                                                                                       |
+| ------------- | -------- | -------- | ------------------------------------------------------------------------------------------------- |
+| `state`       | `string` | No       | Filter by alert state: "all", "no_data", "paused", "alerting", "ok", "pending", "execution_error" |
+| `query`       | `string` | No       | Search query (matches alert name, partial match)                                                  |
+| `dashboardId` | `number` | No       | Filter by dashboard ID                                                                            |
+| `panelId`     | `number` | No       | Filter by panel ID                                                                                |
+| `folderId`    | `number` | No       | Filter by folder ID                                                                               |
+| `limit`       | `number` | No       | Max results to return (default: 1000)                                                             |
 
 **Request Examples**
 
@@ -65,7 +65,7 @@ GET /api/alerts?dashboardId=123 HTTP/1.1
         {
           "value": 85.5,
           "metric": "cpu_usage",
-          "tags": {"instance": "server01"}
+          "tags": { "instance": "server01" }
         }
       ]
     },
@@ -108,40 +108,40 @@ GET /api/alerts?dashboardId=123 HTTP/1.1
 
 **Response Fields**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `number` | Alert ID |
-| `dashboardId` | `number` | Dashboard ID containing alert |
-| `dashboardUId` | `string` | Dashboard UID |
-| `dashboardSlug` | `string` | Dashboard URL slug |
-| `panelId` | `number` | Panel ID containing alert |
-| `name` | `string` | Alert name |
-| `state` | `string` | Current alert state (see Alert States below) |
-| `newStateDate` | `string` | ISO 8601 timestamp of last state change |
-| `evalDate` | `string` | ISO 8601 timestamp of last evaluation |
-| `evalData` | `object` | Evaluation data (matches, values) if alerting |
-| `executionError` | `string` | Error message if state is "execution_error" |
-| `url` | `string` | Relative URL to dashboard panel |
-| `folderTitle` | `string` | Folder name containing dashboard |
+| Field            | Type     | Description                                   |
+| ---------------- | -------- | --------------------------------------------- |
+| `id`             | `number` | Alert ID                                      |
+| `dashboardId`    | `number` | Dashboard ID containing alert                 |
+| `dashboardUId`   | `string` | Dashboard UID                                 |
+| `dashboardSlug`  | `string` | Dashboard URL slug                            |
+| `panelId`        | `number` | Panel ID containing alert                     |
+| `name`           | `string` | Alert name                                    |
+| `state`          | `string` | Current alert state (see Alert States below)  |
+| `newStateDate`   | `string` | ISO 8601 timestamp of last state change       |
+| `evalDate`       | `string` | ISO 8601 timestamp of last evaluation         |
+| `evalData`       | `object` | Evaluation data (matches, values) if alerting |
+| `executionError` | `string` | Error message if state is "execution_error"   |
+| `url`            | `string` | Relative URL to dashboard panel               |
+| `folderTitle`    | `string` | Folder name containing dashboard              |
 
 **Alert States**
 
-| State | Description |
-|-------|-------------|
-| `ok` | Alert condition is not met |
-| `alerting` | Alert condition is met (firing) |
-| `pending` | Alert condition met but within pending period |
-| `paused` | Alert evaluation paused by user |
-| `no_data` | No data received from datasource |
-| `execution_error` | Error executing alert query |
+| State             | Description                                   |
+| ----------------- | --------------------------------------------- |
+| `ok`              | Alert condition is not met                    |
+| `alerting`        | Alert condition is met (firing)               |
+| `pending`         | Alert condition met but within pending period |
+| `paused`          | Alert evaluation paused by user               |
+| `no_data`         | No data received from datasource              |
+| `execution_error` | Error executing alert query                   |
 
 **Error Responses**
 
-| Status | Description | Response Body |
-|--------|-------------|---------------|
-| 401 Unauthorized | Invalid or missing API key | `{"message": "Unauthorized"}` |
-| 403 Forbidden | Insufficient permissions | `{"message": "Permission denied"}` |
-| 500 Internal Server Error | Server error | `{"message": "Internal server error"}` |
+| Status                    | Description                | Response Body                          |
+| ------------------------- | -------------------------- | -------------------------------------- |
+| 401 Unauthorized          | Invalid or missing API key | `{"message": "Unauthorized"}`          |
+| 403 Forbidden             | Insufficient permissions   | `{"message": "Permission denied"}`     |
+| 500 Internal Server Error | Server error               | `{"message": "Internal server error"}` |
 
 **CLI Mapping**
 
@@ -180,9 +180,9 @@ ID   NAME                  DASHBOARD                   FOLDER      EVAL DATE
 
 **Path Parameters**
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | `number` | Yes | Alert ID |
+| Parameter | Type     | Required | Description |
+| --------- | -------- | -------- | ----------- |
+| `id`      | `number` | Yes      | Alert ID    |
 
 **Request**
 
@@ -211,7 +211,7 @@ Accept: application/json
       {
         "value": 85.5,
         "metric": "cpu_usage",
-        "tags": {"instance": "server01"}
+        "tags": { "instance": "server01" }
       }
     ]
   },
@@ -243,9 +243,7 @@ Accept: application/json
     "handler": 1,
     "name": "CPU Usage High",
     "noDataState": "no_data",
-    "notifications": [
-      {"uid": "slack-notifier"}
-    ]
+    "notifications": [{ "uid": "slack-notifier" }]
   },
   "folderTitle": "Production"
 }
@@ -255,23 +253,23 @@ Accept: application/json
 
 Additional fields beyond GET /api/alerts:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `message` | `string` | Alert message/description |
-| `settings` | `object` | Alert configuration (conditions, frequency, notifications) |
-| `settings.conditions` | `array` | Alert condition rules |
-| `settings.frequency` | `string` | Evaluation frequency (e.g., "60s", "5m") |
-| `settings.noDataState` | `string` | State when no data ("no_data", "alerting", "ok") |
-| `settings.executionErrorState` | `string` | State when execution fails |
-| `settings.notifications` | `array` | Notification channels (UIDs) |
+| Field                          | Type     | Description                                                |
+| ------------------------------ | -------- | ---------------------------------------------------------- |
+| `message`                      | `string` | Alert message/description                                  |
+| `settings`                     | `object` | Alert configuration (conditions, frequency, notifications) |
+| `settings.conditions`          | `array`  | Alert condition rules                                      |
+| `settings.frequency`           | `string` | Evaluation frequency (e.g., "60s", "5m")                   |
+| `settings.noDataState`         | `string` | State when no data ("no_data", "alerting", "ok")           |
+| `settings.executionErrorState` | `string` | State when execution fails                                 |
+| `settings.notifications`       | `array`  | Notification channels (UIDs)                               |
 
 **Error Responses**
 
-| Status | Description | Response Body |
-|--------|-------------|---------------|
-| 401 Unauthorized | Invalid or missing API key | `{"message": "Unauthorized"}` |
-| 404 Not Found | Alert ID not found | `{"message": "Alert not found"}` |
-| 403 Forbidden | Insufficient permissions | `{"message": "Permission denied"}` |
+| Status           | Description                | Response Body                      |
+| ---------------- | -------------------------- | ---------------------------------- |
+| 401 Unauthorized | Invalid or missing API key | `{"message": "Unauthorized"}`      |
+| 404 Not Found    | Alert ID not found         | `{"message": "Alert not found"}`   |
+| 403 Forbidden    | Insufficient permissions   | `{"message": "Permission denied"}` |
 
 **CLI Mapping**
 
