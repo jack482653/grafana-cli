@@ -14,6 +14,7 @@ export function createAlertCommand(): Command {
     .command("list")
     .description("List alerts")
     .option("--state <state>", "Filter by state (ok, alerting, pending, paused, no_data)")
+    .option("--folder <name>", "Filter by folder name")
     .option("--query <text>", "Filter by alert name")
     .option("--server <name>", "Use specific server configuration")
     .option("--json", "Output as JSON")
@@ -21,6 +22,7 @@ export function createAlertCommand(): Command {
       const config = resolveConfig(options.server);
       const alerts = await listAlerts(config, {
         state: options.state as AlertState | undefined,
+        folder: options.folder,
         query: options.query,
       });
 

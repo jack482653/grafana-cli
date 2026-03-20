@@ -54,7 +54,7 @@
 **Acceptance Scenarios**:
 
 1. **Given** a dashboard UID and panel ID, **When** I run `grafana-cli query execute --dashboard <uid> --panel <id> --from "now-1h" --to "now"`, **Then** the panel's query is executed and results are displayed
-2. **Given** query results, **When** I run `grafana-cli query execute --dashboard <uid> --panel <id> --output json`, **Then** results are formatted as JSON for programmatic consumption
+2. **Given** query results, **When** I run `grafana-cli query execute --dashboard <uid> --panel <id> --json`, **Then** results are formatted as JSON for programmatic consumption
 3. **Given** a panel with multiple queries, **When** I run `grafana-cli query execute --dashboard <uid> --panel <id>`, **Then** all queries for that panel are executed and results are labeled by query ref ID
 4. **Given** a panel with template variables, **When** I run `grafana-cli query execute --dashboard <uid> --panel <id> --var "server=web01"`, **Then** the query is executed with the specified variable value
 5. **Given** a long-running query, **When** execution exceeds expected time, **Then** progress is shown on stderr and user can cancel with Ctrl+C
@@ -139,7 +139,7 @@
 #### Output Formatting (All Priorities)
 
 - **FR-030**: System MUST support human-readable output format by default (tables, formatted text)
-- **FR-031**: System MUST support JSON output format via `--json` or `--output json` flag
+- **FR-031**: System MUST support JSON output format via `--json` flag
 - **FR-032**: System MUST write data output to stdout
 - **FR-033**: System MUST write error messages to stderr
 - **FR-034**: System MUST exit with code 0 on success, 1 on general error, 2 on authentication error, 3 on network error

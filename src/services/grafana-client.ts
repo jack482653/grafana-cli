@@ -384,16 +384,33 @@ export async function executeQuery(
 }
 
 /**
+ * Resolve a folder name to its numeric id via GET /api/folders.
+ * Returns undefined if the folder is not found.
+ */
+async function resolveFolderId(
+  client: AxiosInstance,
+  folderName: string,
+): Promise<number | undefined> {
+  try {
+    const resp = await client.get<{ id: number; title: string }[]>("/api/folders");
+    const folder = resp.data.find((f) => f.title.toLowerCase() === folderName.toLowerCase());
+    return folder?.id;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * List alerts with optional filters (GET /api/alerts)
  *
  * @param config - Server configuration
- * @param filters - Optional filters: state (ok/alerting/pending/paused/no_data), query string, limit
+ * @param filters - Optional filters: state (ok/alerting/pending/paused/no_data), folder name, query string, limit
  * @returns Array of Alert objects
  * @throws Exits process on network error or authentication failure
  */
 export async function listAlerts(
   config: ServerConfig,
-  filters: { state?: AlertState; query?: string; limit?: number } = {},
+  filters: { state?: AlertState; folder?: string; query?: string; limit?: number } = {},
 ): Promise<Alert[]> {
   const client = createClient(config);
   try {
@@ -401,6 +418,16 @@ export async function listAlerts(
     if (filters.state) params["state"] = filters.state;
     if (filters.query) params["query"] = filters.query;
     if (filters.limit) params["limit"] = filters.limit;
+
+    if (filters.folder) {
+      const folderId = await resolveFolderId(client, filters.folder);
+      if (folderId === undefined) {
+        console.error(`Error: Folder "${filters.folder}" not found.`);
+        console.error("List available folders in Grafana → Dashboards → Browse.");
+        process.exit(1);
+      }
+      params["folderId"] = folderId;
+    }
 
     const response = await client.get<Alert[]>("/api/alerts", { params });
     return response.data;
