@@ -116,6 +116,8 @@ mcp__github__pull_request_read(
 - `IsResolved`: 是否已解決
 
 ## Active Technologies
+- Node.js 18+, TypeScript 5.x (ES2022) + commander 11.x, axios (existing) (004-claude-skill-config)
+- `~/.grafana-cli/config.json` (existing, no schema changes) (004-claude-skill-config)
 
 - Node.js 18+ (LTS), TypeScript 5.x (target: ES2022) (001-cli-mvp)
 - File system (`~/.grafana-cli/config.json` for server configurations) (001-cli-mvp)
