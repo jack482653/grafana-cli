@@ -111,8 +111,8 @@ grafana-cli alert get <id> --json
 
 | Option | Commands | Description |
 |--------|----------|-------------|
-| `--config <name>` | status, dashboard, query, alert | Use named site for this invocation only |
-| `--json` | all | Output as JSON (pipeable) |
+| `--config <name>` | status, dashboard list, dashboard get, query execute, alert list, alert get | Use named site for this invocation only |
+| `--json` | status, dashboard list, dashboard get, query execute, alert list, alert get | Output as JSON (pipeable) |
 | `--state <state>` | alert list | Filter by alert state |
 | `--folder <name>` | dashboard list, alert list | Filter by folder |
 
