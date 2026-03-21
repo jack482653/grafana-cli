@@ -1,4 +1,4 @@
-import { Command } from "commander";
+import { Command, Option } from "commander";
 
 import { formatJson } from "../formatters/json.js";
 import { formatTable } from "../formatters/table.js";
@@ -25,10 +25,11 @@ export function createQueryCommand(): Command {
       "--datasource <uid>",
       "Datasource UID override (required when API key lacks datasource list permission)",
     )
-    .option("--server <name>", "Use specific server configuration")
+    .option("--config <name>", "Site configuration to use")
+    .addOption(new Option("--server <name>").hideHelp())
     .option("--json", "Output as JSON")
     .action(async (options) => {
-      const config = resolveConfig(options.server);
+      const config = resolveConfig(options.config ?? options.server);
 
       // Parse time range
       let fromMs: number, toMs: number;

@@ -1,4 +1,4 @@
-import { Command } from "commander";
+import { Command, Option } from "commander";
 
 import { formatJson } from "../formatters/json.js";
 import { formatTable } from "../formatters/table.js";
@@ -11,13 +11,14 @@ export function createDashboardCommand(): Command {
   dashboard
     .command("list")
     .description("List dashboards")
-    .option("--server <name>", "Use specific server configuration")
+    .option("--config <name>", "Site configuration to use")
+    .addOption(new Option("--server <name>").hideHelp())
     .option("--folder <name>", "Filter by folder name")
     .option("--tag <tag>", "Filter by tag")
     .option("--query <text>", "Search by title")
     .option("--json", "Output as JSON")
     .action(async (options) => {
-      const config = resolveConfig(options.server);
+      const config = resolveConfig(options.config ?? options.server);
 
       const dashboards = await listDashboards(config, {
         folder: options.folder,
@@ -56,10 +57,11 @@ export function createDashboardCommand(): Command {
   dashboard
     .command("get <uid>")
     .description("Get dashboard details by UID")
-    .option("--server <name>", "Use specific server configuration")
+    .option("--config <name>", "Site configuration to use")
+    .addOption(new Option("--server <name>").hideHelp())
     .option("--json", "Output as JSON")
     .action(async (uid: string, options) => {
-      const config = resolveConfig(options.server);
+      const config = resolveConfig(options.config ?? options.server);
 
       const d = await getDashboard(config, uid);
 

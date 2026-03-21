@@ -1,4 +1,4 @@
-import { Command } from "commander";
+import { Command, Option } from "commander";
 
 import { formatJson } from "../formatters/json.js";
 import { formatTable } from "../formatters/table.js";
@@ -16,10 +16,11 @@ export function createAlertCommand(): Command {
     .option("--state <state>", "Filter by state (ok, alerting, pending, paused, no_data)")
     .option("--folder <name>", "Filter by folder name")
     .option("--query <text>", "Filter by alert name")
-    .option("--server <name>", "Use specific server configuration")
+    .option("--config <name>", "Site configuration to use")
+    .addOption(new Option("--server <name>").hideHelp())
     .option("--json", "Output as JSON")
     .action(async (options) => {
-      const config = resolveConfig(options.server);
+      const config = resolveConfig(options.config ?? options.server);
       const alerts = await listAlerts(config, {
         state: options.state as AlertState | undefined,
         folder: options.folder,
@@ -60,10 +61,11 @@ export function createAlertCommand(): Command {
   alert
     .command("get <id>")
     .description("Get alert details")
-    .option("--server <name>", "Use specific server configuration")
+    .option("--config <name>", "Site configuration to use")
+    .addOption(new Option("--server <name>").hideHelp())
     .option("--json", "Output as JSON")
     .action(async (id, options) => {
-      const config = resolveConfig(options.server);
+      const config = resolveConfig(options.config ?? options.server);
       const alertId = parseInt(id, 10);
       if (isNaN(alertId)) {
         console.error("Error: Alert ID must be a number.");
