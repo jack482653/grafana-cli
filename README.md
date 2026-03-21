@@ -6,11 +6,29 @@ Supports Grafana v7.5+.
 
 ## Installation
 
+### From GitHub
+
+```bash
+# Using npm
+npm install -g github:jack482653/grafana-cli
+
+# Using pnpm
+pnpm add -g github:jack482653/grafana-cli
+```
+
+### Using npx (no install)
+
+```bash
+npx github:jack482653/grafana-cli status
+npx github:jack482653/grafana-cli dashboard list
+```
+
+### From Source
+
 ```bash
 git clone https://github.com/jack482653/grafana-cli.git
 cd grafana-cli
 pnpm install
-pnpm build
 pnpm link --global
 ```
 
