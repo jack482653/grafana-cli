@@ -7,16 +7,6 @@ Supports Grafana v7.5+.
 ## Installation
 
 ```bash
-# Using pnpm
-pnpm install -g grafana-cli
-
-# Using npm
-npm install -g grafana-cli
-```
-
-Or run directly from source:
-
-```bash
 git clone https://github.com/jack482653/grafana-cli.git
 cd grafana-cli
 pnpm install
