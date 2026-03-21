@@ -82,8 +82,8 @@ grafana-cli config delete <name>
 # Check active server health
 grafana-cli status
 
-# Check specific server
-grafana-cli status --server <name>
+# Check specific site
+grafana-cli status --config <name>
 ```
 
 ### dashboard
@@ -134,10 +134,15 @@ grafana-cli alert get <id> --json
 grafana-cli config set --name staging --url https://grafana-staging.example.com --api-key <key>
 grafana-cli config set --name prod --url https://grafana.example.com --api-key <key>
 
-# Use a specific server for a command
-grafana-cli status --server staging
-grafana-cli dashboard list --server prod
-grafana-cli alert list --server staging
+# Use --config <name> on any command to target a specific site
+# without changing the global active config
+grafana-cli status --config staging
+grafana-cli dashboard list --config prod
+grafana-cli alert list --config staging
+grafana-cli query execute --dashboard <uid> --panel <id> --config prod
+
+# Or switch the default site permanently
+grafana-cli config use prod
 ```
 
 ## Environment Variables
