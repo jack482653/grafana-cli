@@ -14,7 +14,7 @@ Datasource endpoint supports listing all datasources configured on the server. U
 
 **Description**: List all datasources configured on the Grafana server.
 
-**Authentication**: Required (API key or basic auth). **Requires Editor or Admin role** — Viewer-only credentials receive `403 Forbidden`.
+**Authentication**: Required (API key or basic auth). **Requires Admin role** — Viewer and Editor credentials both receive `403 Forbidden` (the response can include datasource credentials, so Grafana restricts it to Admin only; confirmed empirically against Grafana 7.5.0).
 
 **Query Parameters**: None.
 
@@ -72,17 +72,17 @@ Accept: application/json
 
 **Error Responses**
 
-| Status                    | Description                            | Response Body                          |
-| ------------------------- | -------------------------------------- | -------------------------------------- |
-| 401 Unauthorized          | Invalid or missing API key             | `{"message": "Unauthorized"}`          |
-| 403 Forbidden             | Insufficient permissions (Viewer role) | `{"message": "Permission denied"}`     |
-| 500 Internal Server Error | Server error                           | `{"message": "Internal server error"}` |
+| Status                    | Description                                      | Response Body                          |
+| ------------------------- | ------------------------------------------------ | -------------------------------------- |
+| 401 Unauthorized          | Invalid or missing API key                       | `{"message": "Unauthorized"}`          |
+| 403 Forbidden             | Insufficient permissions (Viewer or Editor role) | `{"message": "Permission denied"}`     |
+| 500 Internal Server Error | Server error                                     | `{"message": "Internal server error"}` |
 
 **CLI Mapping**
 
 - Command: `grafana-cli datasource list [--config <name>] [--json]`
 - Output: Table with ID, NAME, TYPE, DEFAULT
-- On 403: CLI MUST print a message explaining the Editor/Admin requirement (FR-005), not the raw `{"message": "Permission denied"}` body.
+- On 403: CLI MUST print a message explaining the Admin requirement (FR-005), not the raw `{"message": "Permission denied"}` body.
 
 **Example CLI Output**
 
@@ -99,15 +99,16 @@ ID   NAME             TYPE                              DEFAULT
 ```text
 Error: Permission denied listing datasources.
 Server: https://grafana.example.com
-Listing datasources requires Editor or Admin role. Check your account role or API key permissions.
+Listing datasources requires Admin role. Check your account role or API key permissions.
 ```
 
 **Test Cases (Contract Tests)**
 
 1. **List datasources**: `GET /api/datasources` returns 200 with array of datasource objects.
-2. **Response shape**: each item has `id`, `uid`, `name`, `type`, `isDefault`.
-3. **Insufficient permission**: `GET /api/datasources` with a Viewer-role API key returns 403.
-4. **Unauthorized**: `GET /api/datasources` with no/invalid auth returns 401.
+2. **Response shape**: each item has `id`, `name`, `type`, `isDefault` (`uid` optional).
+3. **Insufficient permission (Viewer)**: `GET /api/datasources` with a Viewer-role API key returns 403.
+4. **Insufficient permission (Editor)**: `GET /api/datasources` with an Editor-role API key also returns 403 — Editor is not sufficient, only Admin is.
+5. **Unauthorized**: `GET /api/datasources` with no/invalid auth returns 401.
 
 **References**
 

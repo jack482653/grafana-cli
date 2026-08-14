@@ -4,11 +4,15 @@ import { createClient } from "../../src/services/grafana-client.js";
 
 const GRAFANA_TEST_URL = process.env["GRAFANA_TEST_URL"];
 const GRAFANA_API_KEY = process.env["GRAFANA_API_KEY"];
-// Optional: a Viewer-role API key, used only for the permission-denied test.
+// Optional: non-Admin API keys, used only for the permission-denied tests.
+// GET /api/datasources requires Admin — Viewer AND Editor are both denied,
+// since the response can include datasource credentials.
 const GRAFANA_VIEWER_API_KEY = process.env["GRAFANA_VIEWER_API_KEY"];
+const GRAFANA_EDITOR_API_KEY = process.env["GRAFANA_EDITOR_API_KEY"];
 
 const hasTestServer = !!GRAFANA_TEST_URL;
 const hasViewerKey = !!GRAFANA_VIEWER_API_KEY;
+const hasEditorKey = !!GRAFANA_EDITOR_API_KEY;
 
 const testConfig = {
   name: "test",
@@ -44,19 +48,30 @@ describe.skipIf(!hasTestServer)("Datasource API Contract", () => {
     }
   });
 
-  it.skipIf(!hasViewerKey)(
-    "returns 403 when the credentials lack Editor/Admin permission",
-    async () => {
-      const viewerConfig = { ...testConfig, apiKey: GRAFANA_VIEWER_API_KEY };
-      const client = createClient(viewerConfig);
-      try {
-        await client.get("/api/datasources");
-        expect.fail("Expected 403 error");
-      } catch (err: any) {
-        expect(err.response?.status).toBe(403);
-      }
-    },
-  );
+  it.skipIf(!hasViewerKey)("returns 403 for Viewer-role credentials", async () => {
+    const viewerConfig = { ...testConfig, apiKey: GRAFANA_VIEWER_API_KEY };
+    const client = createClient(viewerConfig);
+    try {
+      await client.get("/api/datasources");
+      expect.fail("Expected 403 error");
+    } catch (err: any) {
+      expect(err.response?.status).toBe(403);
+    }
+  });
+
+  // Editor is denied too — only Admin can list datasources (the response can
+  // include datasource credentials). Verified against a live Grafana 7.5
+  // instance; see specs/005-datasource-folder-list/research.md Decision 1.
+  it.skipIf(!hasEditorKey)("returns 403 for Editor-role credentials", async () => {
+    const editorConfig = { ...testConfig, apiKey: GRAFANA_EDITOR_API_KEY };
+    const client = createClient(editorConfig);
+    try {
+      await client.get("/api/datasources");
+      expect.fail("Expected 403 error");
+    } catch (err: any) {
+      expect(err.response?.status).toBe(403);
+    }
+  });
 });
 
 describe.skipIf(hasTestServer)("Datasource API Contract (no server)", () => {

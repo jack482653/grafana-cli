@@ -16,7 +16,7 @@ Add two read-only listing commands — `datasource list` and `folder list` — s
 **Target Platform**: macOS / Linux CLI
 **Project Type**: Single project (CLI)
 **Performance Goals**: Single API call per command, well within existing 5s command budget
-**Constraints**: Grafana v7.5 HTTP API compatibility; read-only (no writes); `GET /api/datasources` requires Editor/Admin role
+**Constraints**: Grafana v7.5 HTTP API compatibility; read-only (no writes); `GET /api/datasources` requires Admin role (Viewer and Editor are both denied)
 **Scale/Scope**: 2 new sub-commands, 1 new service function (`listDatasources`; `listFolders` wraps the existing internal folder fetch), 2 new types
 
 ## Constitution Check
@@ -77,7 +77,7 @@ tests/
 
 See [research.md](./research.md) for full decision log. Summary:
 
-- **Datasource endpoint choice**: Use `GET /api/datasources` (full list, Editor/Admin-gated) rather than the already-used `GET /api/frontend/settings` (Viewer-accessible but undocumented/internal), because the user-facing command should be built on the documented public contract and clearly surface the permission requirement (FR-005) rather than silently depending on an internal endpoint.
+- **Datasource endpoint choice**: Use `GET /api/datasources` (full list, Admin-gated — Viewer and Editor are both denied) rather than the already-used `GET /api/frontend/settings` (Viewer-accessible but undocumented/internal), because the user-facing command should be built on the documented public contract and clearly surface the permission requirement (FR-005) rather than silently depending on an internal endpoint.
 - **Folder endpoint reuse**: `GET /api/folders` is already called internally by `listAlerts()` via `resolveFolderId()`. This feature adds a public `listFolders()` that returns the full array directly — no new endpoint, just a new exposed path through an existing, already-proven call.
 - **Type naming**: The existing `Datasource` interface in `src/types/index.ts` is a _lightweight reference_ (used inside `Panel`/`Query` — `{type?, uid?, id?}`). The new full-listing shape is named `DatasourceInfo` to avoid colliding with that existing type.
 

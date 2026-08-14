@@ -33,7 +33,7 @@ export function createDatasourceCommand(): Command {
         formatTable({
           columns: [
             { key: "id", header: "ID", width: 8 },
-            { key: "name", header: "NAME", width: 24 },
+            { key: "name", header: "NAME" },
             { key: "type", header: "TYPE" },
             { key: "isDefault", header: "DEFAULT", width: 8 },
           ],

@@ -148,7 +148,7 @@ grafana-cli folder list --json
 
 ```bash
 # List all datasources (find valid names/ids for query execute --datasource)
-# Requires Editor or Admin role
+# Requires Admin role
 grafana-cli datasource list
 grafana-cli datasource list --config prod
 grafana-cli datasource list --json

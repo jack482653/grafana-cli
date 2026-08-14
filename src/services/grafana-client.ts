@@ -220,7 +220,7 @@ export async function getDashboard(config: ServerConfig, uid: string): Promise<D
 /**
  * Fetch datasource map (name → id) from /api/frontend/settings.
  * This endpoint is accessible to all authenticated users including Viewers,
- * unlike /api/datasources which requires Editor/Admin.
+ * unlike /api/datasources which requires Admin.
  */
 async function fetchDatasourceMap(
   client: AxiosInstance,
@@ -466,7 +466,8 @@ export async function listAlerts(
 /**
  * List all datasources configured on the server (GET /api/datasources)
  *
- * Requires Editor or Admin role; Viewer-only credentials receive 403.
+ * Requires Admin role — Viewer and Editor credentials both receive 403,
+ * since the response can include datasource credentials.
  *
  * @param config - Server configuration
  * @returns Array of DatasourceInfo objects with id, uid, name, type, isDefault
@@ -492,7 +493,7 @@ export async function listDatasources(config: ServerConfig): Promise<DatasourceI
       console.error("Error: Permission denied listing datasources.");
       console.error(`Server: ${config.url}`);
       console.error(
-        "Listing datasources requires Editor or Admin role. Check your account role or API key permissions.",
+        "Listing datasources requires Admin role. Check your account role or API key permissions.",
       );
       process.exit(2); // Exit code 2 = auth/permission error
     }

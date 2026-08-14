@@ -61,13 +61,13 @@
 
 ### Tests for User Story 2 (Required by Constitution)
 
-- [x] T007 [P] [US2] Contract test for GET /api/datasources in tests/contract/datasources.test.ts (test returns 200 with array of datasource objects; verify each item has `id`, `uid`, `name`, `type`, `isDefault`; test that credentials without Editor/Admin role return 403)
+- [x] T007 [P] [US2] Contract test for GET /api/datasources in tests/contract/datasources.test.ts (test returns 200 with array of datasource objects; verify each item has `id`, `name`, `type`, `isDefault` and optional `uid`; test that Viewer- and Editor-role credentials both return 403 — only Admin is sufficient, corrected after `/code-review` found the initial "Editor or Admin" assumption was wrong)
 - [x] T008 [P] [US2] Integration test for datasource list flow in tests/integration/datasource-flow.test.ts (test `datasource list` table output contains name/type/default columns; test `datasource list --json` produces a valid JSON array; test `datasource list --config <name>` targets the specified server; test empty result prints "No datasources found.")
 
 ### Implementation for User Story 2
 
 - [x] T009 [P] [US2] Add `DatasourceInfo` interface to src/types/index.ts (`id: number`, `uid?: string`, `name: string`, `type: string`, `isDefault: boolean`)
-- [x] T010 [US2] Implement `listDatasources` service in src/services/grafana-client.ts (fetch `GET /api/datasources`, map response to `DatasourceInfo[]`, add a 403-specific branch with message "Listing datasources requires Editor or Admin role. Check your account role or API key permissions." before falling through to the generic `handleError`)
+- [x] T010 [US2] Implement `listDatasources` service in src/services/grafana-client.ts (fetch `GET /api/datasources`, map response to `DatasourceInfo[]`, add a 403-specific branch with message "Listing datasources requires Admin role. Check your account role or API key permissions." before falling through to the generic `handleError`)
 - [x] T011 [US2] Create datasource command in src/commands/datasource.ts (`createDatasourceCommand` factory, subcommand `list` with `--config <name>` and `--json` options, table output with columns ID/NAME/TYPE/DEFAULT (yes/no) via `formatTable`, "No datasources found." message on empty, JSON output via `formatJson`)
 - [x] T012 [US2] Register datasource command in src/index.ts (import `createDatasourceCommand`, call `program.addCommand`)
 

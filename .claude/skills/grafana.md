@@ -120,7 +120,7 @@ grafana-cli folder list --json
 
 ```bash
 # List all datasources (find valid names/ids for query execute --datasource)
-# Requires Editor or Admin role — Viewer-only credentials get a clear permission error
+# Requires Admin role — Viewer and Editor credentials get a clear permission error
 grafana-cli datasource list
 grafana-cli datasource list --config prod
 grafana-cli datasource list --json

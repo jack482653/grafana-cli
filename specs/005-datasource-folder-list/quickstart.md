@@ -18,7 +18,7 @@ grafana-cli alert list --folder Production
 ## Discover datasources before querying
 
 ```bash
-# See what datasources are available (requires Editor/Admin role)
+# See what datasources are available (requires Admin role)
 grafana-cli datasource list
 
 ID   NAME             TYPE                              DEFAULT
@@ -53,5 +53,7 @@ grafana-cli datasource list --json | jq -r '.[] | select(.isDefault) | .name'
 $ grafana-cli datasource list --config viewer-only-site
 Error: Permission denied listing datasources.
 Server: https://grafana.example.com
-Listing datasources requires Editor or Admin role. Check your account role or API key permissions.
+Listing datasources requires Admin role. Check your account role or API key permissions.
 ```
+
+Note: this endpoint requires **Admin** specifically — Editor-role credentials hit the same error, not just Viewer.

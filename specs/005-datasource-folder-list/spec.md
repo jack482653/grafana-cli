@@ -27,7 +27,7 @@ A user who wants to filter dashboards or alerts by folder (using the existing `-
 
 A user who wants to run `query execute --datasource <name>` or simply understand which datasource powers a panel currently has no way to see the list of datasources configured on the server from the CLI. They want to list all datasources, their type, and which one is the default, so they can supply the correct value elsewhere.
 
-**Why this priority**: Valuable but secondary to folders — it depends on a permission tier (Editor/Admin) that not every user holds, so it's less universally usable and slightly riskier to get right (needs a clear message when the user lacks permission).
+**Why this priority**: Valuable but secondary to folders — it depends on a permission tier (Admin only) that not every user holds, so it's less universally usable and slightly riskier to get right (needs a clear message when the user lacks permission).
 
 **Independent Test**: Can be fully tested by running the datasource listing command against a server with several datasources and confirming each one's name, type, and default indicator is shown, then using one of the returned names with `query execute --datasource <name>` and confirming it resolves correctly.
 
@@ -43,7 +43,7 @@ A user who wants to run `query execute --datasource <name>` or simply understand
 
 - What happens when the target server has zero folders (all dashboards live in the default root)?
 - What happens when the target server has zero datasources configured?
-- How does the system respond when the user's credentials only grant Viewer-level access and they run the datasource listing command?
+- How does the system respond when the user's credentials only grant Viewer- or Editor-level access (both are below the Admin tier the datasource listing endpoint requires) and they run the datasource listing command?
 - What happens when the user targets an unknown/unconfigured server name?
 - How does the system respond when the target server is unreachable or the request times out?
 
