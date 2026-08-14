@@ -6,6 +6,7 @@ import { createConfigCommand } from "./commands/config.js";
 import { createDashboardCommand } from "./commands/dashboard.js";
 import { createDatasourceCommand } from "./commands/datasource.js";
 import { createFolderCommand } from "./commands/folder.js";
+import { createNotificationCommand } from "./commands/notification.js";
 import { createQueryCommand } from "./commands/query.js";
 import { createStatusCommand } from "./commands/status.js";
 
@@ -24,5 +25,6 @@ program.addCommand(createQueryCommand());
 program.addCommand(createAlertCommand());
 program.addCommand(createFolderCommand());
 program.addCommand(createDatasourceCommand());
+program.addCommand(createNotificationCommand());
 
 program.parse();

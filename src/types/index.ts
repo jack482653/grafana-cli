@@ -126,3 +126,26 @@ export interface DatasourceInfo {
   type: string;
   isDefault: boolean;
 }
+
+// Alert notification channel types (list/detail split, mirroring Alert/AlertDetail)
+export interface NotificationChannel {
+  id: number;
+  uid?: string;
+  name: string;
+  type: string;
+  isDefault: boolean;
+}
+
+export interface NotificationChannelDetail {
+  id: number;
+  uid?: string;
+  name: string;
+  type: string;
+  isDefault: boolean;
+  sendReminder: boolean;
+  disableResolveMessage: boolean;
+  frequency?: string;
+  created?: string;
+  updated?: string;
+  settings: Record<string, unknown>;
+}

@@ -154,6 +154,20 @@ grafana-cli datasource list --config prod
 grafana-cli datasource list --json
 ```
 
+### notification
+
+```bash
+# List all alert notification channels (email/Slack/webhook/etc.)
+# Requires Editor or Admin role
+grafana-cli notification list
+grafana-cli notification list --config prod
+grafana-cli notification list --json
+
+# Get a channel's full configuration (see where an alert actually notifies)
+grafana-cli notification get <id>
+grafana-cli notification get <id> --json
+```
+
 ## Multiple Servers
 
 ```bash
@@ -169,6 +183,7 @@ grafana-cli alert list --config staging
 grafana-cli query execute --dashboard <uid> --panel <id> --config prod
 grafana-cli folder list --config staging
 grafana-cli datasource list --config prod
+grafana-cli notification list --config prod
 
 # Or switch the default site permanently
 grafana-cli config use prod

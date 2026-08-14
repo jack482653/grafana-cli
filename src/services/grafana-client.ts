@@ -7,6 +7,8 @@ import type {
   Dashboard,
   DatasourceInfo,
   Folder,
+  NotificationChannel,
+  NotificationChannelDetail,
   QueryResult,
   ServerConfig,
   ServerStatus,
@@ -530,6 +532,112 @@ export async function getAlert(config: ServerConfig, id: number): Promise<AlertD
       console.error(`Error: Alert ${id} not found.`);
       console.error("List available alerts with: grafana-cli alert list");
       process.exit(1);
+    }
+    handleError(error, config.url);
+  }
+}
+
+/**
+ * List all notification channels configured on the server (GET /api/alert-notifications)
+ *
+ * Requires Editor or Admin role — Viewer credentials receive 403
+ * (verified empirically against Grafana 7.5.0; see
+ * specs/006-notification-channels/research.md Decision 2).
+ *
+ * @param config - Server configuration
+ * @returns Array of NotificationChannel objects with id, uid, name, type, isDefault
+ * @throws Exits process with a permission-specific message on 403, or via
+ *   handleError on network/authentication failure
+ */
+export async function listNotificationChannels(
+  config: ServerConfig,
+): Promise<NotificationChannel[]> {
+  const client = createClient(config);
+  try {
+    const response = await client.get<
+      { id: number; uid?: string; name: string; type: string; isDefault: boolean }[]
+    >("/api/alert-notifications");
+    return response.data.map((n) => ({
+      id: n.id,
+      uid: n.uid,
+      name: n.name,
+      type: n.type,
+      isDefault: n.isDefault,
+    }));
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 403) {
+      console.error("Error: Permission denied listing notification channels.");
+      console.error(`Server: ${config.url}`);
+      console.error(
+        "Listing notification channels requires Editor or Admin role. Check your account role or API key permissions.",
+      );
+      process.exit(2); // Exit code 2 = auth/permission error
+    }
+    handleError(error, config.url);
+  }
+}
+
+/**
+ * Get a single notification channel's full configuration by ID
+ * (GET /api/alert-notifications/:id)
+ *
+ * Requires Editor or Admin role — Viewer credentials receive 403, same as
+ * the list endpoint (verified empirically).
+ *
+ * @param config - Server configuration
+ * @param id - Numeric channel ID
+ * @returns NotificationChannelDetail with settings, reminder/resolve behavior
+ * @throws Exits process with message if channel not found (404), or a
+ *   permission-specific message on 403
+ */
+export async function getNotificationChannel(
+  config: ServerConfig,
+  id: number,
+): Promise<NotificationChannelDetail> {
+  const client = createClient(config);
+  try {
+    const response = await client.get<{
+      id: number;
+      uid?: string;
+      name: string;
+      type: string;
+      isDefault: boolean;
+      sendReminder: boolean;
+      disableResolveMessage: boolean;
+      frequency?: string;
+      created?: string;
+      updated?: string;
+      settings?: Record<string, unknown>;
+    }>(`/api/alert-notifications/${id}`);
+    const n = response.data;
+    return {
+      id: n.id,
+      uid: n.uid,
+      name: n.name,
+      type: n.type,
+      isDefault: n.isDefault,
+      sendReminder: n.sendReminder,
+      disableResolveMessage: n.disableResolveMessage,
+      frequency: n.frequency,
+      created: n.created,
+      updated: n.updated,
+      settings: n.settings || {},
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      console.error(`Error: Notification channel ${id} not found.`);
+      console.error("List available channels with: grafana-cli notification list");
+      process.exit(1);
+    }
+    if (axios.isAxiosError(error) && error.response?.status === 403) {
+      // Same literal message as listNotificationChannels, per contracts.md:
+      // the get endpoint reuses the list endpoint's permission message verbatim.
+      console.error("Error: Permission denied listing notification channels.");
+      console.error(`Server: ${config.url}`);
+      console.error(
+        "Listing notification channels requires Editor or Admin role. Check your account role or API key permissions.",
+      );
+      process.exit(2); // Exit code 2 = auth/permission error
     }
     handleError(error, config.url);
   }

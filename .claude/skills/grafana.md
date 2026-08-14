@@ -126,14 +126,28 @@ grafana-cli datasource list --config prod
 grafana-cli datasource list --json
 ```
 
+## notification — Discover Alert Notification Channels
+
+```bash
+# List all notification channels (email/Slack/webhook/etc.)
+# Requires Editor or Admin role — Viewer credentials get a clear permission error
+grafana-cli notification list
+grafana-cli notification list --config prod
+grafana-cli notification list --json
+
+# Get a channel's full configuration (see where an alert actually notifies)
+grafana-cli notification get <id>
+grafana-cli notification get <id> --json
+```
+
 ## Common Options
 
-| Option            | Commands                                                                                                  | Description                             |
-| ----------------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| `--config <name>` | status, dashboard list, dashboard get, query execute, alert list, alert get, folder list, datasource list | Use named site for this invocation only |
-| `--json`          | status, dashboard list, dashboard get, query execute, alert list, alert get, folder list, datasource list | Output as JSON (pipeable)               |
-| `--state <state>` | alert list                                                                                                | Filter by alert state                   |
-| `--folder <name>` | dashboard list, alert list                                                                                | Filter by folder                        |
+| Option            | Commands                                                                                                                                       | Description                             |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `--config <name>` | status, dashboard list, dashboard get, query execute, alert list, alert get, folder list, datasource list, notification list, notification get | Use named site for this invocation only |
+| `--json`          | status, dashboard list, dashboard get, query execute, alert list, alert get, folder list, datasource list, notification list, notification get | Output as JSON (pipeable)               |
+| `--state <state>` | alert list                                                                                                                                     | Filter by alert state                   |
+| `--folder <name>` | dashboard list, alert list                                                                                                                     | Filter by folder                        |
 
 ## Environment Variables
 
