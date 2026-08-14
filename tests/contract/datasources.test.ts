@@ -27,17 +27,20 @@ describe.skipIf(!hasTestServer)("Datasource API Contract", () => {
     expect(Array.isArray(response.data)).toBe(true);
   });
 
-  it("datasource entries have id, uid, name, type, and isDefault fields", async () => {
+  it("datasource entries have id, name, type, and isDefault fields", async () => {
     const client = createClient(testConfig);
     const response = await client.get("/api/datasources");
 
     if (response.data.length > 0) {
       const first = response.data[0];
       expect(first).toHaveProperty("id");
-      expect(first).toHaveProperty("uid");
       expect(first).toHaveProperty("name");
       expect(first).toHaveProperty("type");
       expect(first).toHaveProperty("isDefault");
+      // uid is optional in v7.5 (may be absent on older provisioned datasources)
+      if (first.uid !== undefined) {
+        expect(typeof first.uid).toBe("string");
+      }
     }
   });
 

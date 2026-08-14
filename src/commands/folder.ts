@@ -1,4 +1,4 @@
-import { Command } from "commander";
+import { Command, Option } from "commander";
 
 import { formatJson } from "../formatters/json.js";
 import { formatTable } from "../formatters/table.js";
@@ -13,9 +13,10 @@ export function createFolderCommand(): Command {
     .command("list")
     .description("List folders")
     .option("--config <name>", "Site configuration to use")
+    .addOption(new Option("--server <name>").hideHelp())
     .option("--json", "Output as JSON")
     .action(async (options) => {
-      const config = resolveConfig(options.config);
+      const config = resolveConfig(options.config ?? options.server);
       const folders = await listFolders(config);
 
       if (options.json) {

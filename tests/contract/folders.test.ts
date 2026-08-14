@@ -24,16 +24,19 @@ describe.skipIf(!hasTestServer)("Folder API Contract", () => {
     expect(Array.isArray(response.data)).toBe(true);
   });
 
-  it("folder entries have id, uid, and title fields", async () => {
+  it("folder entries have id and title fields", async () => {
     const client = createClient(testConfig);
     const response = await client.get("/api/folders");
 
     if (response.data.length > 0) {
       const first = response.data[0];
       expect(first).toHaveProperty("id");
-      expect(first).toHaveProperty("uid");
       expect(first).toHaveProperty("title");
       expect(typeof first.title).toBe("string");
+      // uid is optional in v7.5 (may be absent on older provisioned folders)
+      if (first.uid !== undefined) {
+        expect(typeof first.uid).toBe("string");
+      }
     }
   });
 
