@@ -33,8 +33,8 @@ export function createFolderCommand(): Command {
         formatTable({
           columns: [
             { key: "id", header: "ID", width: 8 },
-            { key: "uid", header: "UID", width: 20 },
-            { key: "title", header: "TITLE", width: 40 },
+            { key: "uid", header: "UID" },
+            { key: "title", header: "TITLE" },
           ],
           data: folders.map((f) => ({
             id: String(f.id),
