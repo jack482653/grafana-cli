@@ -135,6 +135,25 @@ grafana-cli alert get <id>
 grafana-cli alert get <id> --json
 ```
 
+### folder
+
+```bash
+# List all folders (find valid names for --folder on dashboard/alert list)
+grafana-cli folder list
+grafana-cli folder list --config staging
+grafana-cli folder list --json
+```
+
+### datasource
+
+```bash
+# List all datasources (find valid names/ids for query execute --datasource)
+# Requires Admin role
+grafana-cli datasource list
+grafana-cli datasource list --config prod
+grafana-cli datasource list --json
+```
+
 ## Multiple Servers
 
 ```bash
@@ -148,6 +167,8 @@ grafana-cli status --config staging
 grafana-cli dashboard list --config prod
 grafana-cli alert list --config staging
 grafana-cli query execute --dashboard <uid> --panel <id> --config prod
+grafana-cli folder list --config staging
+grafana-cli datasource list --config prod
 
 # Or switch the default site permanently
 grafana-cli config use prod

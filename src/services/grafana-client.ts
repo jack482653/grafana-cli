@@ -5,6 +5,8 @@ import type {
   AlertDetail,
   AlertState,
   Dashboard,
+  DatasourceInfo,
+  Folder,
   QueryResult,
   ServerConfig,
   ServerStatus,
@@ -218,7 +220,7 @@ export async function getDashboard(config: ServerConfig, uid: string): Promise<D
 /**
  * Fetch datasource map (name → id) from /api/frontend/settings.
  * This endpoint is accessible to all authenticated users including Viewers,
- * unlike /api/datasources which requires Editor/Admin.
+ * unlike /api/datasources which requires Admin.
  */
 async function fetchDatasourceMap(
   client: AxiosInstance,
@@ -404,6 +406,28 @@ async function resolveFolderId(
 }
 
 /**
+ * List all folders visible to the authenticated user (GET /api/folders)
+ *
+ * @param config - Server configuration
+ * @returns Array of Folder objects with id, uid, and title
+ * @throws Exits process on network error or authentication failure
+ */
+export async function listFolders(config: ServerConfig): Promise<Folder[]> {
+  const client = createClient(config);
+  try {
+    const response =
+      await client.get<{ id: number; uid?: string; title: string }[]>("/api/folders");
+    return response.data.map((f) => ({
+      id: f.id,
+      uid: f.uid,
+      title: f.title,
+    }));
+  } catch (error) {
+    handleError(error, config.url);
+  }
+}
+
+/**
  * List alerts with optional filters (GET /api/alerts)
  *
  * @param config - Server configuration
@@ -435,6 +459,44 @@ export async function listAlerts(
     const response = await client.get<Alert[]>("/api/alerts", { params });
     return response.data;
   } catch (error) {
+    handleError(error, config.url);
+  }
+}
+
+/**
+ * List all datasources configured on the server (GET /api/datasources)
+ *
+ * Requires Admin role — Viewer and Editor credentials both receive 403,
+ * since the response can include datasource credentials.
+ *
+ * @param config - Server configuration
+ * @returns Array of DatasourceInfo objects with id, uid, name, type, isDefault
+ * @throws Exits process with a permission-specific message on 403, or via
+ *   handleError on network/authentication failure
+ */
+export async function listDatasources(config: ServerConfig): Promise<DatasourceInfo[]> {
+  const client = createClient(config);
+  try {
+    const response =
+      await client.get<
+        { id: number; uid?: string; name: string; type: string; isDefault: boolean }[]
+      >("/api/datasources");
+    return response.data.map((d) => ({
+      id: d.id,
+      uid: d.uid,
+      name: d.name,
+      type: d.type,
+      isDefault: d.isDefault,
+    }));
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 403) {
+      console.error("Error: Permission denied listing datasources.");
+      console.error(`Server: ${config.url}`);
+      console.error(
+        "Listing datasources requires Admin role. Check your account role or API key permissions.",
+      );
+      process.exit(2); // Exit code 2 = auth/permission error
+    }
     handleError(error, config.url);
   }
 }

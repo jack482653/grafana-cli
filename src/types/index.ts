@@ -109,3 +109,20 @@ export interface ServerStatus {
   database: string;
   commit?: string;
 }
+
+// Folder types
+export interface Folder {
+  id: number;
+  uid?: string;
+  title: string;
+}
+
+// Datasource listing types (distinct from the lightweight Datasource
+// reference type above, which describes a panel/query's datasource pointer)
+export interface DatasourceInfo {
+  id: number;
+  uid?: string;
+  name: string;
+  type: string;
+  isDefault: boolean;
+}
