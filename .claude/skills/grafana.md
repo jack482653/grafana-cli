@@ -107,29 +107,48 @@ grafana-cli alert get <id> --config prod
 grafana-cli alert get <id> --json
 ```
 
+## folder — Discover Folders
+
+```bash
+# List all folders (find valid names for --folder on dashboard/alert list)
+grafana-cli folder list
+grafana-cli folder list --config staging
+grafana-cli folder list --json
+```
+
+## datasource — Discover Datasources
+
+```bash
+# List all datasources (find valid names/ids for query execute --datasource)
+# Requires Editor or Admin role — Viewer-only credentials get a clear permission error
+grafana-cli datasource list
+grafana-cli datasource list --config prod
+grafana-cli datasource list --json
+```
+
 ## Common Options
 
-| Option | Commands | Description |
-|--------|----------|-------------|
-| `--config <name>` | status, dashboard list, dashboard get, query execute, alert list, alert get | Use named site for this invocation only |
-| `--json` | status, dashboard list, dashboard get, query execute, alert list, alert get | Output as JSON (pipeable) |
-| `--state <state>` | alert list | Filter by alert state |
-| `--folder <name>` | dashboard list, alert list | Filter by folder |
+| Option            | Commands                                                                                                  | Description                             |
+| ----------------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `--config <name>` | status, dashboard list, dashboard get, query execute, alert list, alert get, folder list, datasource list | Use named site for this invocation only |
+| `--json`          | status, dashboard list, dashboard get, query execute, alert list, alert get, folder list, datasource list | Output as JSON (pipeable)               |
+| `--state <state>` | alert list                                                                                                | Filter by alert state                   |
+| `--folder <name>` | dashboard list, alert list                                                                                | Filter by folder                        |
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
+| Variable                  | Description                                                       |
+| ------------------------- | ----------------------------------------------------------------- |
 | `GRAFANA_CLI_CONFIG_PATH` | Override config file path (default: `~/.grafana-cli/config.json`) |
 
 ## Exit Codes
 
-| Code | Meaning |
-|------|---------|
-| 0 | Success |
-| 1 | General error |
-| 2 | Authentication error (401/403) |
-| 3 | Network error (connection refused / timeout) |
+| Code | Meaning                                      |
+| ---- | -------------------------------------------- |
+| 0    | Success                                      |
+| 1    | General error                                |
+| 2    | Authentication error (401/403)               |
+| 3    | Network error (connection refused / timeout) |
 
 ## Common Workflows
 
