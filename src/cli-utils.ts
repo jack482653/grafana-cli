@@ -15,7 +15,7 @@
  */
 export function parseNumericId(value: string, label: string): number {
   if (!/^\d+$/.test(value)) {
-    console.error(`Error: ${label} must be a number.`);
+    console.error(`Error: ${label} must be a positive number.`);
     process.exit(1);
   }
   return parseInt(value, 10);
