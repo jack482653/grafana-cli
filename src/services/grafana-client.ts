@@ -566,15 +566,25 @@ export async function listNotificationChannels(
     }));
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.status === 403) {
-      console.error("Error: Permission denied listing notification channels.");
-      console.error(`Server: ${config.url}`);
-      console.error(
-        "Listing notification channels requires Editor or Admin role. Check your account role or API key permissions.",
-      );
-      process.exit(2); // Exit code 2 = auth/permission error
+      handleNotificationPermissionError(config.url);
     }
     handleError(error, config.url);
   }
+}
+
+/**
+ * Print the permission-denied message shared by listNotificationChannels
+ * and getNotificationChannel — per contracts.md, both endpoints MUST show
+ * the exact same literal message on 403, so this is the single source of
+ * truth for that string rather than two copies that could drift apart.
+ */
+function handleNotificationPermissionError(serverUrl: string): never {
+  console.error("Error: Permission denied listing notification channels.");
+  console.error(`Server: ${serverUrl}`);
+  console.error(
+    "Listing notification channels requires Editor or Admin role. Check your account role or API key permissions.",
+  );
+  process.exit(2); // Exit code 2 = auth/permission error
 }
 
 /**
@@ -630,14 +640,7 @@ export async function getNotificationChannel(
       process.exit(1);
     }
     if (axios.isAxiosError(error) && error.response?.status === 403) {
-      // Same literal message as listNotificationChannels, per contracts.md:
-      // the get endpoint reuses the list endpoint's permission message verbatim.
-      console.error("Error: Permission denied listing notification channels.");
-      console.error(`Server: ${config.url}`);
-      console.error(
-        "Listing notification channels requires Editor or Admin role. Check your account role or API key permissions.",
-      );
-      process.exit(2); // Exit code 2 = auth/permission error
+      handleNotificationPermissionError(config.url);
     }
     handleError(error, config.url);
   }

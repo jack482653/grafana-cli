@@ -1,4 +1,4 @@
-import { Command } from "commander";
+import { Command, Option } from "commander";
 
 import { formatJson } from "../formatters/json.js";
 import { formatTable } from "../formatters/table.js";
@@ -15,9 +15,10 @@ export function createNotificationCommand(): Command {
     .command("list")
     .description("List notification channels")
     .option("--config <name>", "Site configuration to use")
+    .addOption(new Option("--server <name>").hideHelp())
     .option("--json", "Output as JSON")
     .action(async (options) => {
-      const config = resolveConfig(options.config);
+      const config = resolveConfig(options.config ?? options.server);
       const channels = await listNotificationChannels(config);
 
       if (options.json) {
@@ -53,14 +54,15 @@ export function createNotificationCommand(): Command {
     .command("get <id>")
     .description("Get notification channel details")
     .option("--config <name>", "Site configuration to use")
+    .addOption(new Option("--server <name>").hideHelp())
     .option("--json", "Output as JSON")
     .action(async (id: string, options) => {
-      const config = resolveConfig(options.config);
-      const channelId = parseInt(id, 10);
-      if (isNaN(channelId)) {
+      const config = resolveConfig(options.config ?? options.server);
+      if (!/^\d+$/.test(id)) {
         console.error("Error: Channel ID must be a number.");
         process.exit(1);
       }
+      const channelId = parseInt(id, 10);
 
       const detail = await getNotificationChannel(config, channelId);
 
@@ -78,12 +80,15 @@ export function createNotificationCommand(): Command {
       if (detail.updated) console.log(`Updated:                 ${detail.updated}`);
 
       const settingsKeys = Object.keys(detail.settings);
-      console.log("\nSettings:");
       if (settingsKeys.length === 0) {
-        console.log("  (none)");
+        console.log("\nSettings: (none)");
       } else {
+        console.log("\nSettings:");
         for (const key of settingsKeys) {
-          console.log(`  ${key}: ${detail.settings[key]}`);
+          const value = detail.settings[key];
+          const rendered =
+            typeof value === "object" && value !== null ? JSON.stringify(value) : String(value);
+          console.log(`  ${key}: ${rendered}`);
         }
       }
     });

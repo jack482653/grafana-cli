@@ -66,11 +66,11 @@ export function createAlertCommand(): Command {
     .option("--json", "Output as JSON")
     .action(async (id, options) => {
       const config = resolveConfig(options.config ?? options.server);
-      const alertId = parseInt(id, 10);
-      if (isNaN(alertId)) {
+      if (!/^\d+$/.test(id)) {
         console.error("Error: Alert ID must be a number.");
         process.exit(1);
       }
+      const alertId = parseInt(id, 10);
 
       const detail = await getAlert(config, alertId);
 
