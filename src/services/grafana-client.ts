@@ -7,6 +7,8 @@ import type {
   Dashboard,
   DatasourceInfo,
   Folder,
+  NotificationChannel,
+  NotificationChannelDetail,
   QueryResult,
   ServerConfig,
   ServerStatus,
@@ -62,9 +64,30 @@ export function createClient(config: ServerConfig): AxiosInstance {
 }
 
 /**
- * Handle HTTP errors with meaningful messages
+ * Describes a resource-specific 403 message, used to override handleError's
+ * generic "Permission denied" copy with one naming the actual role required.
  */
-export function handleError(error: unknown, serverUrl: string): never {
+export interface ForbiddenMessage {
+  /** Appended to "Error: " on the first line, e.g. "Permission denied listing datasources." */
+  summary: string;
+  /** The explanatory third line, e.g. "Listing datasources requires Admin role. ..." */
+  detail: string;
+}
+
+/**
+ * Handle HTTP errors with meaningful messages.
+ *
+ * @param forbidden - Optional resource-specific 403 message. When provided,
+ *   it replaces the generic "Permission denied" copy below — this is the
+ *   single place every command's custom 403 text should go through, rather
+ *   than each service function duplicating its own console.error/process.exit
+ *   block.
+ */
+export function handleError(
+  error: unknown,
+  serverUrl: string,
+  forbidden?: ForbiddenMessage,
+): never {
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError;
 
@@ -77,9 +100,9 @@ export function handleError(error: unknown, serverUrl: string): never {
     }
 
     if (axiosError.response?.status === 403) {
-      console.error("Error: Permission denied.");
+      console.error(`Error: ${forbidden?.summary ?? "Permission denied."}`);
       console.error(`Server: ${serverUrl}`);
-      console.error("Your credentials do not have sufficient permissions.");
+      console.error(forbidden?.detail ?? "Your credentials do not have sufficient permissions.");
       process.exit(2); // Exit code 2 = auth error
     }
 
@@ -463,6 +486,12 @@ export async function listAlerts(
   }
 }
 
+const DATASOURCE_FORBIDDEN: ForbiddenMessage = {
+  summary: "Permission denied listing datasources.",
+  detail:
+    "Listing datasources requires Admin role. Check your account role or API key permissions.",
+};
+
 /**
  * List all datasources configured on the server (GET /api/datasources)
  *
@@ -489,15 +518,7 @@ export async function listDatasources(config: ServerConfig): Promise<DatasourceI
       isDefault: d.isDefault,
     }));
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 403) {
-      console.error("Error: Permission denied listing datasources.");
-      console.error(`Server: ${config.url}`);
-      console.error(
-        "Listing datasources requires Admin role. Check your account role or API key permissions.",
-      );
-      process.exit(2); // Exit code 2 = auth/permission error
-    }
-    handleError(error, config.url);
+    handleError(error, config.url, DATASOURCE_FORBIDDEN);
   }
 }
 
@@ -532,5 +553,103 @@ export async function getAlert(config: ServerConfig, id: number): Promise<AlertD
       process.exit(1);
     }
     handleError(error, config.url);
+  }
+}
+
+// Shared 403 copy for both notification-channel functions below — per
+// contracts.md, list and get MUST show the exact same message, so this is
+// the single source of truth for that string rather than two copies that
+// could drift apart.
+const NOTIFICATION_FORBIDDEN: ForbiddenMessage = {
+  summary: "Permission denied listing notification channels.",
+  detail:
+    "Listing notification channels requires Editor or Admin role. Check your account role or API key permissions.",
+};
+
+/**
+ * List all notification channels configured on the server (GET /api/alert-notifications)
+ *
+ * Requires Editor or Admin role — Viewer credentials receive 403
+ * (verified empirically against Grafana 7.5.0; see
+ * specs/006-notification-channels/research.md Decision 2).
+ *
+ * @param config - Server configuration
+ * @returns Array of NotificationChannel objects with id, uid, name, type, isDefault
+ * @throws Exits process with a permission-specific message on 403, or via
+ *   handleError on network/authentication failure
+ */
+export async function listNotificationChannels(
+  config: ServerConfig,
+): Promise<NotificationChannel[]> {
+  const client = createClient(config);
+  try {
+    const response = await client.get<
+      { id: number; uid?: string; name: string; type: string; isDefault: boolean }[]
+    >("/api/alert-notifications");
+    return response.data.map((n) => ({
+      id: n.id,
+      uid: n.uid,
+      name: n.name,
+      type: n.type,
+      isDefault: n.isDefault,
+    }));
+  } catch (error) {
+    handleError(error, config.url, NOTIFICATION_FORBIDDEN);
+  }
+}
+
+/**
+ * Get a single notification channel's full configuration by ID
+ * (GET /api/alert-notifications/:id)
+ *
+ * Requires Editor or Admin role — Viewer credentials receive 403, same as
+ * the list endpoint (verified empirically).
+ *
+ * @param config - Server configuration
+ * @param id - Numeric channel ID
+ * @returns NotificationChannelDetail with settings, reminder/resolve behavior
+ * @throws Exits process with message if channel not found (404), or a
+ *   permission-specific message on 403
+ */
+export async function getNotificationChannel(
+  config: ServerConfig,
+  id: number,
+): Promise<NotificationChannelDetail> {
+  const client = createClient(config);
+  try {
+    const response = await client.get<{
+      id: number;
+      uid?: string;
+      name: string;
+      type: string;
+      isDefault: boolean;
+      sendReminder: boolean;
+      disableResolveMessage: boolean;
+      frequency?: string;
+      created?: string;
+      updated?: string;
+      settings?: Record<string, unknown>;
+    }>(`/api/alert-notifications/${id}`);
+    const n = response.data;
+    return {
+      id: n.id,
+      uid: n.uid,
+      name: n.name,
+      type: n.type,
+      isDefault: n.isDefault,
+      sendReminder: n.sendReminder,
+      disableResolveMessage: n.disableResolveMessage,
+      frequency: n.frequency,
+      created: n.created,
+      updated: n.updated,
+      settings: n.settings || {},
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      console.error(`Error: Notification channel ${id} not found.`);
+      console.error("List available channels with: grafana-cli notification list");
+      process.exit(1);
+    }
+    handleError(error, config.url, NOTIFICATION_FORBIDDEN);
   }
 }

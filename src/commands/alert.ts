@@ -1,5 +1,6 @@
 import { Command, Option } from "commander";
 
+import { parseNumericId } from "../cli-utils.js";
 import { formatJson } from "../formatters/json.js";
 import { formatTable } from "../formatters/table.js";
 import { resolveConfig } from "../services/config-store.js";
@@ -66,11 +67,7 @@ export function createAlertCommand(): Command {
     .option("--json", "Output as JSON")
     .action(async (id, options) => {
       const config = resolveConfig(options.config ?? options.server);
-      const alertId = parseInt(id, 10);
-      if (isNaN(alertId)) {
-        console.error("Error: Alert ID must be a number.");
-        process.exit(1);
-      }
+      const alertId = parseNumericId(id, "Alert ID");
 
       const detail = await getAlert(config, alertId);
 
