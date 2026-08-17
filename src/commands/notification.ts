@@ -1,5 +1,6 @@
 import { Command, Option } from "commander";
 
+import { parseNumericId } from "../cli-utils.js";
 import { formatJson } from "../formatters/json.js";
 import { formatTable } from "../formatters/table.js";
 import { resolveConfig } from "../services/config-store.js";
@@ -58,11 +59,7 @@ export function createNotificationCommand(): Command {
     .option("--json", "Output as JSON")
     .action(async (id: string, options) => {
       const config = resolveConfig(options.config ?? options.server);
-      if (!/^\d+$/.test(id)) {
-        console.error("Error: Channel ID must be a number.");
-        process.exit(1);
-      }
-      const channelId = parseInt(id, 10);
+      const channelId = parseNumericId(id, "Channel ID");
 
       const detail = await getNotificationChannel(config, channelId);
 
